@@ -2,16 +2,49 @@ const THREAD_COUNT = 64;
 
 const THREAD_SIZE = 2;
 
-let colors = [
-  ["#fcc111", 6],
-  ["#0ff0ce", 43],
-  ["#fc2a8c", 21],
-  ["#15872a", 43],
-  ["#000000", 12]
-];
+let imgPath = "../rootImages/pittFlag.png";
+let fontPathReg = "../fonts/Archivo-Regular.ttf";
+let fontPathBlack = "../fonts/ArchivoBlack-Regular.ttf";
+
+let img;
+let fontBlack;
+let fontReg;
+
+let colors;
 
 let sett;
 let fullSett;
+
+function colorsFromImg() {
+  // referencing this stackoverflow post:
+  // https://stackoverflow.com/questions/54707586/getting-pixel-values-of-images-in-p5js
+  //image(img, 0, 0, width, height);
+
+  col = [];
+  num = [];
+  colors = [];
+  
+  img.loadPixels();
+  numPix = 4 * img.width * img.height;
+  for (let i = 0; i < numPix; i += 4) {
+    let r = img.pixels[i];
+    let g = img.pixels[i+1];
+    let b = img.pixels[i+2];
+    let pixelCol = "#" + hex(((r << 16) | (g << 8) | b), 6);
+
+    colI = col.indexOf(pixelCol);
+    if (colI == -1) {
+      col.push(pixelCol);
+      num.push(1);
+    } else {
+      ++ num[colI];
+    }
+  }
+
+  for (let i = 0; i < col.length; i++) {
+    colors.push([col[i], num[i]]);
+  }
+}
 
 function generateSett() {
   let totalWeight = 0;
@@ -19,6 +52,8 @@ function generateSett() {
   for (let i = 0; i < colors.length; ++ i) {
     totalWeight += colors[i][1];
   }
+
+  console.log("original colors:\n" + colors);
 
   let weightFactor = (THREAD_COUNT / 2) / totalWeight;
 
@@ -98,14 +133,63 @@ function drawSett() {
   drawWeft();
 }
 
+function writeSett() {
+  noStroke();
+  textSize(36);
+  textFont(fontBlack);
+  textAlign(LEFT, TOP);
+  
+  let title = "thread count";
+  let margin = 15;
+  let sWidth = textWidth(title);
+  
+  fill(255);
+  rect(width - sWidth - margin * 2, 0, sWidth + margin * 2, height);
+
+  fill(0);
+  text(title, width - margin - sWidth, margin);
+
+  let lastTextY = margin;
+  let lastTextSize = 36;
+
+  textSize(36);
+  textFont(fontReg);
+  fill(0);
+  
+  for (let i = 0; i < sett.length; ++ i) {
+    let str = '[' + sett[i][0] + '] ' + sett[i][1];
+    stroke(0);
+    strokeWeight(2);
+    fill(sett[i][0]);
+    rect(width - sWidth - margin, lastTextY + lastTextSize + margin,
+	 textWidth(str) + 4, 36 + 4);
+
+    noStroke();
+    fill(brightness(color(sett[i][0])) > 128 ? 0 : 255);
+    text(str,
+	 width - sWidth - margin, lastTextY + lastTextSize + margin);
+    lastTextY = lastTextY + lastTextSize + margin;
+    lastTextSize = 36;
+  }
+}
+
+function preload() {
+  fontBlack = loadFont(fontPathBlack);
+  fontReg = loadFont(fontPathReg);
+  img = loadImage(imgPath);
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  colorMode(HSB, 255);
+  colorsFromImg();
   generateSett();
   expandSett();
-  background(0);
-  drawSett();
 }
 
 function draw() {
-  //background(220);
+  background(0);
+  drawSett();
+  writeSett();
+  noLoop()
 }
