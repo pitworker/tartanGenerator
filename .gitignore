@@ -1,0 +1,15 @@
+# wasm stuff
+tartan-generator/target
+tartan-generator/**/*.rs.bk
+tartan-generator/Cargo.lock
+tartan-generator/bin
+tartan-generator/pkg
+tartan-generator/wasm-pack.log
+
+# frontend stuff
+frontend/node_modules
+frontend/dist
+frontend/.bin
+
+# general stuff
+*~
