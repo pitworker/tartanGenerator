@@ -1,6 +1,6 @@
-import * as wasm from "tartan-generator";
+import { TartanGenerator } from "tartan-generator";
 
-wasm.greet();
+//wasm.greet();
 
 let imageLoader = document.getElementById('imageLoader');
 imageLoader.addEventListener('change', handleImage, false);
@@ -16,8 +16,12 @@ function handleImage(e){
     img.onload = function(){
       canvas.width = 50;
       canvas.height = 50 / img.width * img.height;
-      ctx.drawImage(img,0,0,50,50 / img.width * img.height);
-      console.log(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+      let imgData = ctx.getImageData(0,0,canvas.width, canvas.height).data;
+      console.log(imgData);
+      //wasm.take_img(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
+      let tg = TartanGenerator.new(imgData.length, imgData);
     }
     img.src = event.target.result;
   }
