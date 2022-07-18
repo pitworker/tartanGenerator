@@ -1,4 +1,4 @@
-import { TartanGenerator } from "tartan-generator";
+import { TartanGenerator, Sett } from "tartan-generator";
 
 //wasm.greet();
 
@@ -20,8 +20,8 @@ function handleImage(e){
 
       let imgData = ctx.getImageData(0,0,canvas.width, canvas.height).data;
       console.log(imgData);
-      //wasm.take_img(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
       let tg = TartanGenerator.new(imgData.length, imgData);
+      tg.make_sett(3);
     }
     img.src = event.target.result;
   }
