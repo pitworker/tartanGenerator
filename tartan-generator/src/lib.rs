@@ -5,6 +5,7 @@ extern crate web_sys;
 
 use wasm_bindgen::prelude::*;
 use kmeans::*;
+use rand::prelude::*;
 
 macro_rules! log  {
   ( $( $t:tt )* ) => {
@@ -101,18 +102,13 @@ impl TartanGenerator {
 
     // Generate some random data
     let mut samples = vec![0.0f32;sample_cnt * sample_dims];
-    //samples.iter_mut().for_each(|v| *v = rand::random());
-
-    let conf = KMeansConfig::build()
-      .init_done(&|_| println!("Initialization completed."))
-      .iteration_done(&|s, nr, new_distsum|
-        println!("Iteration {} - Error: {:.2} -> {:.2} | Improvement: {:.2}",
-          nr, s.distsum, new_distsum, s.distsum - new_distsum))
-      .build();
+    samples.iter_mut().for_each(|v| *v = rand::random());
 
     // Calculate kmeans, using kmean++ as initialization-method
     let kmean = KMeans::new(samples, sample_cnt, sample_dims);
-    let result = kmean.kmeans_minibatch(4, k, max_iter, KMeans::init_random_sample, &conf);
+    let result = kmean.kmeans_lloyd(
+      k, max_iter, KMeans::init_kmeanplusplus, &KMeansConfig::default()
+    );
 
     println!("Centroids: {:?}", result.centroids);
     println!("Cluster-Assignments: {:?}", result.assignments);
