@@ -1,11 +1,13 @@
 mod utils;
 
+extern crate js_sys;
 extern crate web_sys;
-//extern crate kmeans;
 
 use wasm_bindgen::prelude::*;
-use kmeans::*;
-use rand::prelude::*;
+use palette::{FromColor, IntoColor, Lab, Pixel, Srgb};
+use kmeans_colors::{get_kmeans, Calculate, Kmeans, MapColor, Sort};
+
+//use kmeans::*;
 
 macro_rules! log  {
   ( $( $t:tt )* ) => {
@@ -63,17 +65,17 @@ impl Sett {
 #[wasm_bindgen]
 pub struct TartanGenerator {
   size: usize,
-  pixels: Vec<f32>
+  pixels: Vec<Lab>
 }
 
 #[wasm_bindgen]
 impl TartanGenerator {
   pub fn new(s: u32, pxl: &[u8]) -> TartanGenerator {
     let size = s as usize;
-    let mut pixels: Vec<f32> = vec![0.0f32;size];
-    for i in 0..size {
-      pixels[i as usize] = (pxl[i as usize] as f32) / 255.0;
-    }
+    let pixels: Vec<Lab> = Srgb::from_raw_slice(pxl)
+      .iter()
+      .map(|p| p.into_format().into_color())
+      .collect();
 
     TartanGenerator {
       size,
@@ -96,19 +98,27 @@ impl TartanGenerator {
   }
 
   pub fn make_sett(&self, n: usize) -> Sett {
+    /*
     let subpix = 3; // number of subpixels, 3 for RGB
     let (sample_cnt, sample_dims, k, max_iter) =
       (self.size / subpix, subpix, n, 1000);
+     */
+
+    let (sample_cnt, sample_dims, k, max_iter) =
+      (10000, 3, 4, 100);
 
     // Generate some random data
     let mut samples = vec![0.0f32;sample_cnt * sample_dims];
-    samples.iter_mut().for_each(|v| *v = rand::random());
+    samples.iter_mut().for_each(|v| *v = js_sys::Math::random() as f32);
 
     // Calculate kmeans, using kmean++ as initialization-method
+    log!("WHAT");
     let kmean = KMeans::new(samples, sample_cnt, sample_dims);
+    log!("IS");
     let result = kmean.kmeans_lloyd(
       k, max_iter, KMeans::init_kmeanplusplus, &KMeansConfig::default()
     );
+    log!("UP");
 
     println!("Centroids: {:?}", result.centroids);
     println!("Cluster-Assignments: {:?}", result.assignments);

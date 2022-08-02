@@ -2,7 +2,7 @@
 name = "tartan-generator"
 version = "0.1.0"
 authors = ["swan"]
-edition = "2018"
+edition = "2022"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -12,8 +12,11 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.63"
-kmeans = "0.2.0"
-rand = "0.8.5"
+js-sys = "0.3"
+kmeans_colors = "0.5.0"
+palette = "0.6.1"
+#kmeans = "0.2.0"
+
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
