@@ -3,6 +3,7 @@ mod utils;
 extern crate js_sys;
 extern crate web_sys;
 
+use core::fmt;
 use wasm_bindgen::prelude::*;
 use palette::{FromColor, IntoColor, Lab, Pixel, Srgb};
 use kmeans_colors::{get_kmeans, Calculate, Kmeans, MapColor, Sort};
@@ -36,17 +37,42 @@ pub fn take_img(img_data: &[u8]) {
   log!("it work? {0}", img_data[0]);
 }
 
+#[wasm_bindgen]
+struct ColorValue {
+  r: u8,
+  g: u8,
+  b: u8,
+  count: usize
+}
+
+#[wasm_bindgen]
+impl fmt::Debug for ColorValue {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("ColorValue")
+      .field("r", &self.r)
+      .field("g", &self.g)
+      .field("b", &self.b)
+      .field("count", &self.count)
+      .finsh()
+  }
+}
 
 #[wasm_bindgen]
 pub struct Sett {
-  colors: Vec<(u8,usize)>
+  colors: Vec<SettColor>
 }
 
 #[wasm_bindgen]
 impl Sett {
-  fn new(centroids: Vec<f32>, cent_freq: Vec<usize>) -> Sett{
-    let l: usize = centroids.len();
-    let mut colors: Vec<(u8,usize)> = vec![(0u8,0usize);l];
+  fn new(centroids: Vec<ColorValue>, t: usize) -> Sett{
+    let totalPxls : usize = centroids
+      .iter()
+      .fold(0, |total, c| total + c.num_points);
+    let colors: Vec<ColorValue> = &mut centroids
+      .iter()
+      .map(|c| SettColor{r: c.r, g: c.g, b: c.b, count: 0})
+      .collect::<Vec<ColorValue>>();
+    centroids.iter().for_each(|c|
 
     for i in 0..l {
       if centroids[i] < 0.0f32 {
@@ -83,26 +109,69 @@ impl TartanGenerator {
     }
   }
 
+  /*** Keeping this one on the backburner for now.
   pub fn replace_img(&mut self, s: u32, pxl: &[u8]) {
     let size = s as usize;
 
     if self.size > size {
-      self.pixels.resize(size, 0.0f32);
+      self.pixels.resize(size, Lab::new(0.0,0.0,0.0));
     } else if self.size < size {
       self.pixels.truncate(size);
     }
     self.size = size;
+
+    pxl
+      .iter()
+      .for_each(|p|)
+      .collect();
+
     for i in 0..size {
       self.pixels[i as usize] = (pxl[i as usize] as f32) / 255.0;
     }
   }
+  */
 
-  pub fn make_sett(&self, n: usize) -> Sett {
-    /*
+  /**
+   * n: number of colors
+   * t: thread count. Requires t >= n
+   */
+  pub fn make_sett(&self, n: usize, t: usize) -> Sett {
+    let mut result = Kmeans::new();
+    for i in 0..250 {
+      let run_result = get_kmeans(
+        n,
+        250,
+        0.05,
+        false,
+        self.pixels,
+        (js_sys::Math::random() * 255.0) as u64 + i as u64
+      );
+      if run_result.score < result.score {
+        result = run_result;
+      }
+    }
+
+    let rgb = &result.centroids
+      .iter()
+      .map(|x| Srgb::from_color(*x).into_format())
+      .collect::<Vec<Srgb<u8>>>();
+
+    let centroid_vals = &mut rgb
+      .iter()
+      .map(|c| ColorValue(r: c.red, g: c.green, b: c.blue, count: 0})
+      .collect::<Vec<ColorValue>>();
+    result.indices
+      .iter()
+      .for_each(|i| centroid_data[*i as usize].count +=1);
+
+    log!("Centroids: {:?}", centroid_data);
+
+    Sett::new(centroid_vals, t);
+
+    /*** Using the old kmeans library
     let subpix = 3; // number of subpixels, 3 for RGB
     let (sample_cnt, sample_dims, k, max_iter) =
       (self.size / subpix, subpix, n, 1000);
-     */
 
     let (sample_cnt, sample_dims, k, max_iter) =
       (10000, 3, 4, 100);
@@ -142,5 +211,6 @@ impl TartanGenerator {
     log!("Error: {}", result.distsum);
     */
     Sett::new(result.centroids, result.centroid_frequency)
+    */
   }
 }
