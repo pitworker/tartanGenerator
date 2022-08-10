@@ -2,7 +2,7 @@
 name = "tartan-generator"
 version = "0.1.0"
 authors = ["swan"]
-edition = "2022"
+edition = "2018"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -13,8 +13,9 @@ default = ["console_error_panic_hook"]
 [dependencies]
 wasm-bindgen = "0.2.63"
 js-sys = "0.3"
+getrandom = { version = "0.2.7", features = ["js"] }
 kmeans_colors = "0.5.0"
-palette = "0.6.1"
+#palette = "0.6.1"
 #kmeans = "0.2.0"
 
 
@@ -36,6 +37,11 @@ version = "0.3"
 features = [
   "console",
 ]
+
+[dependencies.palette]
+version = "0.6.1"
+default-features = false
+features = ["libm"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"

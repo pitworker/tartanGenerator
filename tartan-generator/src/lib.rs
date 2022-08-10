@@ -1,12 +1,16 @@
+#![no_std]
+
 mod utils;
 
 extern crate js_sys;
 extern crate web_sys;
+extern crate alloc;
 
 use core::fmt;
+use alloc::{vec::Vec, format};
 use wasm_bindgen::prelude::*;
 use palette::{FromColor, IntoColor, Lab, Pixel, Srgb};
-use kmeans_colors::{get_kmeans, Calculate, Kmeans, MapColor, Sort};
+use kmeans_colors::{get_kmeans, Kmeans};
 
 //use kmeans::*;
 
@@ -28,8 +32,8 @@ extern {
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-  alert("Hello, tartan-generator!");
+pub fn log_something() {
+  log!("Hello, tartan-generator!");
 }
 
 #[wasm_bindgen]
@@ -44,8 +48,8 @@ struct ColorValue {
   b: u8,
   count: usize
 }
-
-#[wasm_bindgen]
+/*
+//#[wasm_bindgen]
 impl fmt::Debug for ColorValue {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("ColorValue")
@@ -53,27 +57,31 @@ impl fmt::Debug for ColorValue {
       .field("g", &self.g)
       .field("b", &self.b)
       .field("count", &self.count)
-      .finsh()
+      .finish()
   }
 }
-
+*/
 #[wasm_bindgen]
 pub struct Sett {
-  colors: Vec<SettColor>
+  colors: Vec<ColorValue>,
+  count: usize
 }
 
 #[wasm_bindgen]
 impl Sett {
-  fn new(centroids: Vec<ColorValue>, t: usize) -> Sett{
-    let totalPxls : usize = centroids
+  fn new(centroids: Vec<ColorValue>, t: usize) -> Sett {
+    let total_pxls : usize = centroids
       .iter()
-      .fold(0, |total, c| total + c.num_points);
-    let colors: Vec<ColorValue> = &mut centroids
+      .fold(0, |total, c| total + c.count);
+    let colors: Vec<ColorValue> = centroids
       .iter()
-      .map(|c| SettColor{r: c.r, g: c.g, b: c.b, count: 0})
+      .map(|c| ColorValue { r: c.r, g: c.g, b: c.b, count: c.count })
       .collect::<Vec<ColorValue>>();
-    centroids.iter().for_each(|c|
 
+    let count = colors.len();
+    //centroids.iter().for_each(|c|
+
+    /*
     for i in 0..l {
       if centroids[i] < 0.0f32 {
         colors[i] = (0u8, cent_freq[i]);
@@ -81,9 +89,10 @@ impl Sett {
         colors[i] = ((centroids[i] * 255.0).round() as u8, cent_freq[i]);
       }
     }
-
+    */
     Sett {
-      colors: colors
+      colors: colors,
+      count: count
     }
   }
 }
@@ -97,11 +106,23 @@ pub struct TartanGenerator {
 #[wasm_bindgen]
 impl TartanGenerator {
   pub fn new(s: u32, pxl: &[u8]) -> TartanGenerator {
+    utils::set_panic_hook();
+    log!("making new tartan");
+    const pxl_cnt: usize = s * 3;
     let size = s as usize;
-    let pixels: Vec<Lab> = Srgb::from_raw_slice(pxl)
+
+    let mut random_pxl: [u8; pxl_cnt] = [0; pxl_cnt];
+    for i in 0..pxl_cnt {
+      random_pxl[i] = (js_sys::Math::random() * 255.0) as u8;
+    }
+
+    log!("made size");
+    let pixels: Vec<Lab> = Srgb::from_raw_slice(&random_pxl)
       .iter()
       .map(|p| p.into_format().into_color())
       .collect();
+
+    log!("lab generated");
 
     TartanGenerator {
       size,
@@ -136,37 +157,43 @@ impl TartanGenerator {
    * t: thread count. Requires t >= n
    */
   pub fn make_sett(&self, n: usize, t: usize) -> Sett {
+    log!("Making sett");
     let mut result = Kmeans::new();
+    let rand_seed = (js_sys::Math::random() * 255.0) as u64;
     for i in 0..250 {
       let run_result = get_kmeans(
         n,
         250,
         0.05,
         false,
-        self.pixels,
-        (js_sys::Math::random() * 255.0) as u64 + i as u64
+        &self.pixels,
+        rand_seed + i as u64
       );
       if run_result.score < result.score {
         result = run_result;
       }
     }
 
+    log!("Got kmeans value");
+
     let rgb = &result.centroids
       .iter()
       .map(|x| Srgb::from_color(*x).into_format())
       .collect::<Vec<Srgb<u8>>>();
 
-    let centroid_vals = &mut rgb
+    let mut centroid_vals = rgb
       .iter()
-      .map(|c| ColorValue(r: c.red, g: c.green, b: c.blue, count: 0})
+      .map(|c| ColorValue { r: c.red, g: c.green, b: c.blue, count: 0 })
       .collect::<Vec<ColorValue>>();
     result.indices
       .iter()
-      .for_each(|i| centroid_data[*i as usize].count +=1);
+      .for_each(|i| centroid_vals[*i as usize].count +=1);
 
-    log!("Centroids: {:?}", centroid_data);
+    log!("Got centroids");
 
-    Sett::new(centroid_vals, t);
+    //log!("Centroids: {:?}", centroid_vals);
+
+    Sett::new(centroid_vals, t)
 
     /*** Using the old kmeans library
     let subpix = 3; // number of subpixels, 3 for RGB

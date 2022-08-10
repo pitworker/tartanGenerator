@@ -1,4 +1,4 @@
-import { TartanGenerator, Sett } from "tartan-generator";
+import { TartanGenerator, Sett, log_something } from "tartan-generator";
 
 //wasm.greet();
 
@@ -20,8 +20,11 @@ function handleImage(e){
 
       let imgData = ctx.getImageData(0,0,canvas.width, canvas.height).data;
       console.log(imgData);
+      log_something();
       let tg = TartanGenerator.new(imgData.length, imgData);
+      console.log("made new tartan generator");
       tg.make_sett(3);
+      console.log("made sett");
     }
     img.src = event.target.result;
   }
