@@ -105,19 +105,20 @@ pub struct TartanGenerator {
 
 #[wasm_bindgen]
 impl TartanGenerator {
-  pub fn new(s: u32, pxl: &[u8]) -> TartanGenerator {
+  pub fn new(s: u32, pxl: &mut [u8]) -> TartanGenerator {
     utils::set_panic_hook();
     log!("making new tartan");
-    const pxl_cnt: usize = s * 3;
     let size = s as usize;
 
-    let mut random_pxl: [u8; pxl_cnt] = [0; pxl_cnt];
+    pxl.iter_mut().for_each(|p| *p = ((js_sys::Math::random() * 255.0) as u8));
+
+    /*
     for i in 0..pxl_cnt {
       random_pxl[i] = (js_sys::Math::random() * 255.0) as u8;
     }
-
+    */
     log!("made size");
-    let pixels: Vec<Lab> = Srgb::from_raw_slice(&random_pxl)
+    let pixels: Vec<Lab> = Srgb::from_raw_slice(pxl)
       .iter()
       .map(|p| p.into_format().into_color())
       .collect();
