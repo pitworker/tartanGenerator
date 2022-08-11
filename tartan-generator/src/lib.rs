@@ -201,7 +201,7 @@ impl TartanGenerator {
     let total_count: usize = result.indices.len();
     let mut new_count = total_count;
     let mut new_t = t;
-    let mut tmp_t = t;
+    let mut tmp_t = new_t;
     let mut counts: Vec<usize> = alloc::vec![0usize; centroid_vals.len()];
     result.indices
       .iter()

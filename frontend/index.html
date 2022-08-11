@@ -2,13 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <title>Tartan Generator</title>
   </head>
   <body>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
-    <label>Image File:</label><br/>
-    <input type="file" id="imageLoader" name="imageLoader"/>
-    <canvas id="imageCanvas"></canvas>
+    <div id="image">
+      <label>Image File:</label><br/>
+      <input type="file" id="imageLoader" name="imageLoader"/>
+      <canvas id="imageCanvas"></canvas>
+    </div>
     <script src="./bootstrap.js"></script>
   </body>
 </html>
