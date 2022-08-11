@@ -198,27 +198,58 @@ impl TartanGenerator {
       .map(|c| ColorValue { r: c.red, g: c.green, b: c.blue, count: 0 })
       .collect::<Vec<ColorValue>>();
 
-    let mut total_count: usize = result.indices.len();
-    let mut new_total_count = total_count;
+    let total_count: usize = result.indices.len();
+    let mut new_count = total_count;
+    let mut new_t = t;
+    let mut tmp_t = t;
     let mut counts: Vec<usize> = alloc::vec![0usize; centroid_vals.len()];
     result.indices
       .iter()
       .for_each(|i| counts[*i as usize] +=1);
 
+    // Assign 1 thread to all colors with thread proportions <= 1
     for i in 0..counts.len() {
-      if ((counts[i] as f32 / total_count as f32) * t as f32) < 1.0 {
+      if ((counts[i] as f32 / total_count as f32) * t as f32) <= 1.0 {
         centroid_vals[i].count = 1;
-        new_total_count -= 1;
+        tmp_t -= 1;
+        new_count -= counts[i];
       }
     }
-    total_count = new_total_count;
+    new_t = tmp_t;
+
+    // Assign floor of thread proportion to all remaining colors
     for i in 0..counts.len() {
       if centroid_vals[i].count == 0 {
-        let p_cnt =
-          ((counts[i] as f32 / total_count as f32) * t as f32) as usize;
-        centroid_vals[i].count = p_cnt;
-        new_total_count -= p_cnt;
+        let t_cnt =
+          ((counts[i] as f32 / new_count as f32) * new_t as f32) as usize;
+        centroid_vals[i].count = t_cnt;
+        tmp_t -= t_cnt;
       }
+    }
+    new_t = tmp_t;
+
+    // For any remaining threads, assign to color with proportion closest to
+    // ceiling, but not exceeding it
+    for _i in 0..new_t {
+      let mut closest: usize = 0;
+      for j in 0..counts.len() {
+        let prop = (counts[j] as f32 / total_count as f32) * t as f32;
+        let prop_ceil = prop.ceil();
+        let prop_diff = prop_ceil - prop;
+        let prop_assigned = centroid_vals[j].count as f32;
+
+        let closest_prop =
+          (counts[closest] as f32 / total_count as f32) * t as f32;
+        let closest_diff = closest_prop.ceil() - closest_prop;
+
+        if centroid_vals[j].count == 0 ||
+          (prop_diff < closest_diff &&
+           prop_ceil - prop_assigned > 0.0 &&
+           centroid_vals[closest].count != 0) {
+          closest = j;
+        }
+      }
+      centroid_vals[closest].count += 1;
     }
 
     log!("Got centroids");
