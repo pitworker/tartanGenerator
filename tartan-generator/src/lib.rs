@@ -42,32 +42,37 @@ pub fn take_img(img_data: &[u8]) {
 }
 
 #[wasm_bindgen]
-struct ColorValue {
+#[derive(Copy, Clone)]
+pub struct ColorValue {
   r: u8,
   g: u8,
   b: u8,
   count: usize
 }
-/*
-//#[wasm_bindgen]
-impl fmt::Debug for ColorValue {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("ColorValue")
-      .field("r", &self.r)
-      .field("g", &self.g)
-      .field("b", &self.b)
-      .field("count", &self.count)
-      .finish()
+
+#[wasm_bindgen]
+impl ColorValue {
+  pub fn get_r(&self) -> u8 {
+    self.r
+  }
+  pub fn get_g(&self) -> u8 {
+    self.g
+  }
+  pub fn get_b(&self) -> u8 {
+    self.b
+  }
+  pub fn get_count(&self) -> usize {
+    self.count
   }
 }
-*/
+
+
 #[wasm_bindgen]
 pub struct Sett {
   colors: Vec<ColorValue>,
   count: usize
 }
 
-#[wasm_bindgen]
 impl Sett {
   fn new(centroids: Vec<ColorValue>, t: usize) -> Sett {
     let total_pxls : usize = centroids
@@ -79,20 +84,24 @@ impl Sett {
       .collect::<Vec<ColorValue>>();
 
     let count = colors.len();
-    //centroids.iter().for_each(|c|
 
-    /*
-    for i in 0..l {
-      if centroids[i] < 0.0f32 {
-        colors[i] = (0u8, cent_freq[i]);
-      } else {
-        colors[i] = ((centroids[i] * 255.0).round() as u8, cent_freq[i]);
-      }
-    }
-    */
     Sett {
       colors: colors,
       count: count
+    }
+  }
+}
+
+#[wasm_bindgen]
+impl Sett {
+  pub fn get_count(&self) -> usize {
+    self.count
+  }
+  pub fn get_color(&self, i: usize) -> Option<ColorValue> {
+    if i < self.count {
+      Some(self.colors[i])
+    } else {
+      None
     }
   }
 }
@@ -103,22 +112,46 @@ pub struct TartanGenerator {
   pixels: Vec<Lab>
 }
 
+impl TartanGenerator {
+  fn remove_alpha(pxl: &[u8]) -> Vec<u8> {
+    let l = pxl.len() / 4;
+    log!("l is {0}", l);
+
+    let mut pxl_no_alpha: Vec<u8> = alloc::vec![0u8; l * 3];
+
+    log!("pxl_no_alpha has len {0}", pxl_no_alpha.len());
+
+    for i in 0..l {
+      let i4 = i * 4;
+      let i3 = i * 3;
+      let a: f32 = pxl[i4 + 3] as f32 / 255.0;
+      let (r, g, b) = (
+        (pxl[i4] as f32 * a) as u8,
+        (pxl[i4 + 1] as f32 * a) as u8,
+        (pxl[i4 + 2] as f32 * a) as u8
+      );
+      pxl_no_alpha[i3] = r;
+      pxl_no_alpha[i3 + 1] = g;
+      pxl_no_alpha[i3 + 2] = b;
+    }
+
+    pxl_no_alpha
+  }
+}
+
 #[wasm_bindgen]
 impl TartanGenerator {
-  pub fn new(s: u32, pxl: &mut [u8]) -> TartanGenerator {
+  #[wasm_bindgen(constructor)]
+  pub fn new(s: u32, pxl: &[u8]) -> TartanGenerator {
     utils::set_panic_hook();
     log!("making new tartan");
     let size = s as usize;
 
-    pxl.iter_mut().for_each(|p| *p = ((js_sys::Math::random() * 255.0) as u8));
+    let pxl_no_alpha = Self::remove_alpha(pxl);
 
-    /*
-    for i in 0..pxl_cnt {
-      random_pxl[i] = (js_sys::Math::random() * 255.0) as u8;
-    }
-    */
+
     log!("made size");
-    let pixels: Vec<Lab> = Srgb::from_raw_slice(pxl)
+    let pixels: Vec<Lab> = Srgb::from_raw_slice(pxl_no_alpha.as_slice())
       .iter()
       .map(|p| p.into_format().into_color())
       .collect();
@@ -130,28 +163,6 @@ impl TartanGenerator {
       pixels
     }
   }
-
-  /*** Keeping this one on the backburner for now.
-  pub fn replace_img(&mut self, s: u32, pxl: &[u8]) {
-    let size = s as usize;
-
-    if self.size > size {
-      self.pixels.resize(size, Lab::new(0.0,0.0,0.0));
-    } else if self.size < size {
-      self.pixels.truncate(size);
-    }
-    self.size = size;
-
-    pxl
-      .iter()
-      .for_each(|p|)
-      .collect();
-
-    for i in 0..size {
-      self.pixels[i as usize] = (pxl[i as usize] as f32) / 255.0;
-    }
-  }
-  */
 
   /**
    * n: number of colors
@@ -186,59 +197,34 @@ impl TartanGenerator {
       .iter()
       .map(|c| ColorValue { r: c.red, g: c.green, b: c.blue, count: 0 })
       .collect::<Vec<ColorValue>>();
+
+    let mut total_count: usize = result.indices.len();
+    let mut new_total_count = total_count;
+    let mut counts: Vec<usize> = alloc::vec![0usize; centroid_vals.len()];
     result.indices
       .iter()
-      .for_each(|i| centroid_vals[*i as usize].count +=1);
+      .for_each(|i| counts[*i as usize] +=1);
+
+    for i in 0..counts.len() {
+      if ((counts[i] as f32 / total_count as f32) * t as f32) < 1.0 {
+        centroid_vals[i].count = 1;
+        new_total_count -= 1;
+      }
+    }
+    total_count = new_total_count;
+    for i in 0..counts.len() {
+      if centroid_vals[i].count == 0 {
+        let p_cnt =
+          ((counts[i] as f32 / total_count as f32) * t as f32) as usize;
+        centroid_vals[i].count = p_cnt;
+        new_total_count -= p_cnt;
+      }
+    }
 
     log!("Got centroids");
 
     //log!("Centroids: {:?}", centroid_vals);
 
     Sett::new(centroid_vals, t)
-
-    /*** Using the old kmeans library
-    let subpix = 3; // number of subpixels, 3 for RGB
-    let (sample_cnt, sample_dims, k, max_iter) =
-      (self.size / subpix, subpix, n, 1000);
-
-    let (sample_cnt, sample_dims, k, max_iter) =
-      (10000, 3, 4, 100);
-
-    // Generate some random data
-    let mut samples = vec![0.0f32;sample_cnt * sample_dims];
-    samples.iter_mut().for_each(|v| *v = js_sys::Math::random() as f32);
-
-    // Calculate kmeans, using kmean++ as initialization-method
-    log!("WHAT");
-    let kmean = KMeans::new(samples, sample_cnt, sample_dims);
-    log!("IS");
-    let result = kmean.kmeans_lloyd(
-      k, max_iter, KMeans::init_kmeanplusplus, &KMeansConfig::default()
-    );
-    log!("UP");
-
-    println!("Centroids: {:?}", result.centroids);
-    println!("Cluster-Assignments: {:?}", result.assignments);
-    println!("Error: {}", result.distsum);
-    /*
-    let conf = kmeans::KMeansConfig::build()
-      .init_done(&|_| log!("Initialization completed."))
-      .iteration_done(&|s, nr, new_distsum|
-        log!("Iteration {} - Error: {:.2} -> {:.2} | Improvement: {:.2}",
-          nr, s.distsum, new_distsum, s.distsum - new_distsum))
-      .build();
-    log!("it work???");
-    let kmean = KMeans::new(self.pixels.to_vec(), sample_cnt, sample_dims);
-
-    let result = kmean.kmeans_minibatch(
-      4, k, max_iter, KMeans::init_random_sample, &conf
-    );
-
-    log!("Centroids: {:?}", result.centroids);
-    log!("Cluster-Sizes: {:?}", result.centroid_frequency);
-    log!("Error: {}", result.distsum);
-    */
-    Sett::new(result.centroids, result.centroid_frequency)
-    */
   }
 }

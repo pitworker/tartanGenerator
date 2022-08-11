@@ -1,3 +1,4 @@
+import { memory } from "tartan-generator/tartan_generator_bg";
 import { TartanGenerator, Sett, log_something } from "tartan-generator";
 
 //wasm.greet();
@@ -21,10 +22,18 @@ function handleImage(e){
       let imgData = ctx.getImageData(0,0,canvas.width, canvas.height).data;
       console.log(imgData);
       log_something();
-      let tg = TartanGenerator.new(imgData.length, imgData);
+      let tg = new TartanGenerator(imgData.length, imgData);
       console.log("made new tartan generator");
-      tg.make_sett(3);
-      console.log("made sett");
+      let sett = tg.make_sett(3,7);
+      console.log(`made sett with ${sett.get_count()} colors`);
+
+      let colors = "[";
+      for (let i = 0;  i < 3; i++) {
+        let clr = sett.get_color(i);
+        colors += `{r: ${clr.get_r()}, g: ${clr.get_g()}, b: ${clr.get_b()}, count: ${clr.get_count()}}`;
+      }
+      colors += "]";
+      console.log("colors", colors);
     }
     img.src = event.target.result;
   }
