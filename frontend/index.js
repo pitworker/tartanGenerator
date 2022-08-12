@@ -11,6 +11,16 @@ let ctx = imgCanvas.getContext('2d');
 let numColors = 5;
 let numThreads = 64;
 
+let gotSett = false;
+let sett = null;
+let fullSett = null;
+let s = null;
+
+const WARP = true;
+const WEFT = false;
+
+const THREAD_SIZE = 2;
+
 /************************************
  * IMAGE HANDLING / SETT GENERATION *
  ************************************/
@@ -29,7 +39,8 @@ function handleImage(e){
       log_something();
       let tg = new TartanGenerator(imgData.length, imgData);
       console.log("made new tartan generator");
-      let sett = tg.make_sett(numColors,numThreads);
+      sett = tg.make_sett(numColors,numThreads);
+      fullSett = sett.get_sett_per_thread();
       console.log(`made sett with ${sett.get_count()} colors`);
 
       let colors = "[";
@@ -45,6 +56,9 @@ function handleImage(e){
       }
       colors += "\n]";
       console.log("colors: ", colors);
+
+      gotSett = true;
+      if (s) s.draw();
     }
     img.src = event.target.result;
   }
@@ -54,13 +68,58 @@ function handleImage(e){
 /************************
  * TARTAN DRAWING STUFF *
  ************************/
-const SKETCH = (s) => {
+function drawThreads(isWarp) {
+  let dim = isWarp ? s.width : s.height;
+  let len = isWarp ? s.height : s.width;
+
+  for (let i = 0; i < dim / THREAD_SIZE; i++) {
+    let start = i % 4 - (isWarp ? 2.5 : 1.5);
+    let thread = i % fullSett.get_count();
+    let clr = fullSett.get_color(thread);
+    s.stroke(clr.get_r(), clr.get_g(), clr.get_b());
+    /*console.log(`Drawing threads with color [${clr.get_r},${clr.get_g},${clr.get_b}] at position ${i}`);*/
+    for (let j = start; j < len / THREAD_SIZE; j += 4) {
+      let x = isWarp ? i : j;
+      let y = isWarp ? j : i;
+      s.line(
+        x * THREAD_SIZE,
+        y * THREAD_SIZE,
+        (x + (isWarp ? 0 : 2)) * THREAD_SIZE,
+        (y + (isWarp ? 2 : 0)) * THREAD_SIZE
+      );
+    }
+  }
+}
+function drawSett() {
+  if (s && gotSett) {
+    console.log("Drawing Sett");
+    s.strokeWeight(THREAD_SIZE);
+    s.strokeCap(s.SQUARE);
+    drawThreads(WARP);
+    drawThreads(WEFT);
+  } else if (s) {
+    console.warn("Attempted to draw tartan without sett");
+  } else if (gotSett) {
+    console.warn("Attempted to draw tartan without p5 instance");
+  } else {
+    console.warn("Attempted to draw tartan without sett or p5 instance");
+  }
+}
+
+const SKETCH = (sketch) => {
+  s = sketch;
   s.setup = () => {
     s.createCanvas(s.windowWidth, s.windowHeight);
-    s.background(0);
+    s.noLoop();
+    s.draw();
+  };
+  s.windowResized = () => {
+    s.resizeCanvas(s.windowWidth, s.windowHeight);
+    s.draw();
   };
   s.draw = () => {
-
+    s.background(0);
+    drawSett();
   };
 };
 new p5(SKETCH);

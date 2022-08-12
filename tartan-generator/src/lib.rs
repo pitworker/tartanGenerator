@@ -50,6 +50,17 @@ pub struct ColorValue {
   count: usize
 }
 
+impl ColorValue {
+  fn new() -> ColorValue {
+    ColorValue {
+      r: 0u8,
+      g: 0u8,
+      b: 0u8,
+      count: 0usize
+    }
+  }
+}
+
 #[wasm_bindgen]
 impl ColorValue {
   pub fn get_r(&self) -> u8 {
@@ -66,11 +77,11 @@ impl ColorValue {
   }
 }
 
-
 #[wasm_bindgen]
 pub struct Sett {
   colors: Vec<ColorValue>,
-  count: usize
+  count: usize,
+  num_threads: usize
 }
 
 impl Sett {
@@ -87,7 +98,8 @@ impl Sett {
 
     Sett {
       colors: colors,
-      count: count
+      count: count,
+      num_threads: t
     }
   }
 }
@@ -102,6 +114,43 @@ impl Sett {
       Some(self.colors[i])
     } else {
       None
+    }
+  }
+  pub fn get_num_threads(&self) -> usize {
+    self.num_threads
+  }
+  pub fn get_sett_per_thread(&self) -> Sett {
+    let t_cnt: usize = self.num_threads * 2;
+    let mut color_per_thread: Vec<ColorValue> =
+      alloc::vec![ColorValue::new(); t_cnt];
+    let num_cols = self.colors.len();
+    let mut cur_thread: usize = 0;
+
+    log!("color_per_thread has size {}", color_per_thread.len());
+
+    for i in 0..num_cols {
+      let color = self.colors[i];
+      for j in 0..color.count {
+        let inv_thread: usize = t_cnt - cur_thread - 1;
+
+        color_per_thread[cur_thread].r = self.colors[i].r;
+        color_per_thread[cur_thread].g = self.colors[i].g;
+        color_per_thread[cur_thread].b = self.colors[i].b;
+        color_per_thread[cur_thread].count = 1;
+
+        color_per_thread[inv_thread].r = self.colors[i].r;
+        color_per_thread[inv_thread].g = self.colors[i].g;
+        color_per_thread[inv_thread].b = self.colors[i].b;
+        color_per_thread[inv_thread].count = 1;
+
+        cur_thread += 1;
+      }
+    }
+
+    Sett {
+      colors: color_per_thread,
+      count: t_cnt,
+      num_threads: t_cnt
     }
   }
 }
