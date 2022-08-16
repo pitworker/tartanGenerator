@@ -1,7 +1,7 @@
 * {
   font-family: "Archivo", sans-serif;
   font-style: normal;
-  font-size: 14px;
+  font-size: 24px;
   font-weight: 400;
   color: #000;
 }
@@ -17,7 +17,74 @@
   z-index: 2;
 }
 #image {
+  position: relative;
+  top: 20px;
+  left: 20px;
+  width: 160px;
+}
+#imageCanvas {
   width: 100%;
+  top: 20px;
+  left: 0px;
+  outline: #000 solid 2px;
+}
+#colorCount {
+  position: relative;
+  left: 20px;
+  width: 160px;
+}
+.slider {
+  position: relative;
+  left: 0px;
+  -webkit-appearance: none;
+  width: 120px;
+  height: 4px;
+  background: #fff;
+  border: #000 solid 2px;
+  -webkit-transition: 0.2s;
+  transition: 0.2s;
+  z-index: 0;
+}
+.slider:hover {
+  background: #000;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 25px;
+  background: #fff;
+  border-radius: 0px;
+  border: none;
+  outline: #000 solid 2px;
+  z-index: 1
+}
+/*
+.slider:-webkit-slider-thumb:hover {
+  background: #fff;
+  outline: #000 solid 2px;
+}
+*/
+.slider::-moz-range-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 25px;
+  background: #fff;
+  border-radius: 0px;
+  border: none;
+  outline: #000 solid 2px;
+  z-index: 1;
+}
+/*.slider::-moz-range-thumb:hover {
+  background: #fff;
+  outline: #000 solid 2px;
+}*/
+.settItem {
+  position: relative;
+  top: 2px;
+  outline: #000 solid 2px;
+  font-size: 24px;
 }
 
 #loading {
