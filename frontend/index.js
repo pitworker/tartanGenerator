@@ -16,6 +16,8 @@ let sett = null;
 let fullSett = null;
 let s = null;
 
+const IMG_WIDTH = 160;
+
 const WARP = true;
 const WEFT = false;
 
@@ -24,41 +26,43 @@ const THREAD_SIZE = 2;
 /************************************
  * IMAGE HANDLING / SETT GENERATION *
  ************************************/
-function handleImage(e){
+async function loadSett() {
+  let imgData =
+      ctx.getImageData(0,0,imgCanvas.width, imgCanvas.height).data;
+  console.log(imgData);
+  log_something();
+  let tg = new TartanGenerator(imgData.length, imgData);
+  console.log("made new tartan generator");
+  sett = tg.make_sett(numColors,numThreads);
+  fullSett = sett.get_sett_per_thread();
+  console.log(`made sett with ${sett.get_count()} colors`);
+
+  let colors = "[";
+  for (let i = 0;  i < numColors; i++) {
+    let clr = sett.get_color(i);
+    colors += "\n  {";
+    colors += `\n    r: ${clr.get_r()}, `
+    colors += `\n    g: ${clr.get_g()}, `
+    colors += `\n    b: ${clr.get_b()}, `
+    colors += `\n    count: ${clr.get_count()}`
+    colors += "\n  }";
+    if (i != numColors - 1) colors += ","
+  }
+  colors += "\n]";
+  console.log("colors: ", colors);
+
+  gotSett = true;
+  if (s) s.draw();
+}
+
+function handleImage(e) {
   let reader = new FileReader();
   reader.onload = function(event){
     let img = new Image();
-    img.onload = function(){
-      imgCanvas.width = 50;
-      imgCanvas.height = 50 / img.width * img.height;
+    img.onload = () => {
+      imgCanvas.width = IMG_WIDTH;
+      imgCanvas.height = IMG_WIDTH / img.width * img.height;
       ctx.drawImage(img,0,0,imgCanvas.width,imgCanvas.height);
-
-      let imgData =
-          ctx.getImageData(0,0,imgCanvas.width, imgCanvas.height).data;
-      console.log(imgData);
-      log_something();
-      let tg = new TartanGenerator(imgData.length, imgData);
-      console.log("made new tartan generator");
-      sett = tg.make_sett(numColors,numThreads);
-      fullSett = sett.get_sett_per_thread();
-      console.log(`made sett with ${sett.get_count()} colors`);
-
-      let colors = "[";
-      for (let i = 0;  i < numColors; i++) {
-        let clr = sett.get_color(i);
-        colors += "\n  {";
-        colors += `\n    r: ${clr.get_r()}, `
-        colors += `\n    g: ${clr.get_g()}, `
-        colors += `\n    b: ${clr.get_b()}, `
-        colors += `\n    count: ${clr.get_count()}`
-        colors += "\n  }";
-        if (i != numColors - 1) colors += ","
-      }
-      colors += "\n]";
-      console.log("colors: ", colors);
-
-      gotSett = true;
-      if (s) s.draw();
     }
     img.src = event.target.result;
   }
@@ -97,6 +101,7 @@ function drawSett() {
     s.strokeCap(s.SQUARE);
     drawThreads(WARP);
     drawThreads(WEFT);
+    hideLoading();
   } else if (s) {
     console.warn("Attempted to draw tartan without sett");
   } else if (gotSett) {
@@ -123,3 +128,36 @@ const SKETCH = (sketch) => {
   };
 };
 new p5(SKETCH);
+
+/*************************
+ * SIDE PANEL INFORMATION*
+ *************************/
+let colorSlider = document.getElementById("colorSlider");
+let colorSliderNum = document.getElementById("numColors");
+let renderBtn = document.getElementById("renderBtn");
+
+colorSliderNum.innerText = colorSlider.value;
+colorSlider.oninput = () => {
+  colorSliderNum.innerText = colorSlider.value;
+  numColors = colorSlider.value;
+};
+
+renderBtn.onclick = () => {
+  showLoading();
+  setTimeout(loadSett, 5);
+};
+
+/*********
+ * MISC. *
+ *********/
+let loading = document.getElementById("loading");
+function showLoading() {
+  console.log("!!!!!!!!!!WHAT THE FUCK!!!!!!");
+  if (loading) {
+    loading.style.width = `${window.innerWidth - 200}px`;
+    loading.style.visibility = "visible";
+  }
+}
+function hideLoading() {
+  if (loading) loading.style.visibility = "hidden";
+}

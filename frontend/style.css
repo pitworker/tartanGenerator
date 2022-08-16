@@ -1,7 +1,42 @@
-#image {
+* {
+  font-family: "Archivo", sans-serif;
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000;
+}
+
+#sideBar {
   position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 200px;
+  background-color: #fff;
+  outline: #000 solid 2px;
+  z-index: 2;
+}
+#image {
+  width: 100%;
+}
+
+#loading {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  height: 100%;
+  background-color: #fff8;
   z-index: 1;
 }
+#loadingText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 32px;
+  font-weight: 600;
+}
+
 main {
   position: fixed;
   left: 0px;
