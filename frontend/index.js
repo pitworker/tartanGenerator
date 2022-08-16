@@ -16,6 +16,12 @@ let sett = null;
 let fullSett = null;
 let s = null;
 
+let loading = document.getElementById("loading");
+let colorSlider = document.getElementById("colorSlider");
+let colorSliderNum = document.getElementById("numColors");
+let renderBtn = document.getElementById("renderBtn");
+let settInfo = document.getElementById("settInfo");
+
 const IMG_WIDTH = 160;
 
 const WARP = true;
@@ -125,6 +131,7 @@ const SKETCH = (sketch) => {
   s.draw = () => {
     s.background(0);
     drawSett();
+    showSettInfo();
   };
 };
 new p5(SKETCH);
@@ -132,10 +139,6 @@ new p5(SKETCH);
 /*************************
  * SIDE PANEL INFORMATION*
  *************************/
-let colorSlider = document.getElementById("colorSlider");
-let colorSliderNum = document.getElementById("numColors");
-let renderBtn = document.getElementById("renderBtn");
-
 colorSliderNum.innerText = colorSlider.value;
 colorSlider.oninput = () => {
   colorSliderNum.innerText = colorSlider.value;
@@ -147,10 +150,44 @@ renderBtn.onclick = () => {
   setTimeout(loadSett, 5);
 };
 
+function getHex(r,g,b) {
+  let hexVals = [r.toString(16), g.toString(16), b.toString(16)];
+  for (let i in hexVals) {
+    if (hexVals[i].length == 1) hexVals[i] = `0${hexVals[i]}`;
+  }
+  return `#${hexVals[0]}${hexVals[1]}${hexVals[2]}`;
+}
+
+function showSettInfo() {
+  if (settInfo && gotSett) {
+    // Clear out any old children
+    while (settInfo.hasChildNodes()) {
+      settInfo.removeChild(settInfo.firstChild);
+    }
+
+    // Add element for each color
+    for (let i = 0;  i < numColors; i++) {
+      let clr = sett.get_color(i);
+      let hex = getHex(clr.get_r(), clr.get_g(), clr.get_b());
+      let count = clr.get_count();
+
+      let elem = document.createElement("DIV");
+      elem.className = "settItem";
+      elem.id = `settItem${i}`;
+      elem.innerText = `${hex}: ${count}`;
+      elem.style.backgroundColor = hex;
+      elem.style.color = (clr.get_r() + clr.get_g() + clr.get_b()) > 382 ?
+        "#000" :
+        "#fff";
+
+      settInfo.appendChild(elem);
+    }
+  }
+}
+
 /*********
  * MISC. *
  *********/
-let loading = document.getElementById("loading");
 function showLoading() {
   console.log("!!!!!!!!!!WHAT THE FUCK!!!!!!");
   if (loading) {
