@@ -8,7 +8,7 @@ imageLoader.addEventListener('change', handleImage, false);
 let imgCanvas = document.getElementById('imageCanvas');
 let ctx = imgCanvas.getContext('2d');
 
-let numColors = 5;
+let numColors = 7;
 let numThreads = 64;
 
 let gotSett = false;
@@ -75,6 +75,20 @@ function handleImage(e) {
   reader.readAsDataURL(e.target.files[0]);
 }
 
+function loadSampleSett() {
+  let img = new Image();
+  numColors = colorSlider.value;
+  showLoading();
+  img.onload = () => {
+    imgCanvas.width = IMG_WIDTH;
+    imgCanvas.height = IMG_WIDTH / img.width * img.height;
+    ctx.drawImage(img,0,0,imgCanvas.width,imgCanvas.height);
+    setTimeout(loadSett, 15);
+  }
+  img.src = "./media/kandinsky.jpg";
+}
+loadSampleSett();
+
 /************************
  * TARTAN DRAWING STUFF *
  ************************/
@@ -129,7 +143,7 @@ const SKETCH = (sketch) => {
     s.draw();
   };
   s.draw = () => {
-    s.background(0);
+    s.background(1);
     drawSett();
     showSettInfo();
   };
@@ -172,14 +186,17 @@ function showSettInfo() {
       let count = clr.get_count();
 
       let elem = document.createElement("DIV");
+      let txt = document.createElement("DIV");
       elem.className = "settItem";
       elem.id = `settItem${i}`;
-      elem.innerText = `${hex}: ${count}`;
+      txt.className = "settItemTxt";
+      txt.innerText = `${hex}: ${count}`;
       elem.style.backgroundColor = hex;
-      elem.style.color = (clr.get_r() + clr.get_g() + clr.get_b()) > 382 ?
+      txt.style.color = (clr.get_r() + clr.get_g() + clr.get_b()) > 382 ?
         "#000" :
         "#fff";
 
+      elem.appendChild(txt);
       settInfo.appendChild(elem);
     }
   }

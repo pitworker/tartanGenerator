@@ -13,7 +13,7 @@
       please enable javascript in your browser.
     </noscript>
     <div id="sideBar">
-      <div id="controls">
+      <div id="controls" class="barSection">
         <div id="image">
           <label>Image File:</label><br/>
           <input type="file" id="imageLoader" name="imageLoader"/>
@@ -22,14 +22,15 @@
         <div id="colorCount">
           <label>Color Count</label>
           <input id="colorSlider" class="slider" type="range"
-                 min="1" max="12" value="5">
-          <span id="numColors">5</span>
+                 min="2" max="12" value="7">
+          <span id="numColors">7</span>
         </div>
         <div id="render">
-          <input id="renderBtn" type="button" value="Render Tartan"/>
+          <input id="renderBtn" class="button"
+                 type="button" value="Render Tartan"/>
         </div>
       </div>
-      <div id="settInfo"></div>
+      <div id="settInfo" class="barSection"></div>
     </div>
     <div id="loading">
       <div id="loadingText">Loading Tartan...</div>

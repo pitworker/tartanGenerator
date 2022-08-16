@@ -16,9 +16,16 @@
   outline: #000 solid 2px;
   z-index: 2;
 }
+.barSection {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  margin-top: 20px;
+}
 #image {
   position: relative;
-  top: 20px;
+  top: 0px;
   left: 20px;
   width: 160px;
 }
@@ -82,9 +89,42 @@
 }*/
 .settItem {
   position: relative;
-  top: 2px;
+  top: 0px;
+  left: 20px;
+  width: 160px;
+  height: 40px;
+  margin-bottom: 10px;
   outline: #000 solid 2px;
+}
+.settItemTxt {
+  position: absolute;
+  top: 8px;
+  left: 10px;
   font-size: 24px;
+}
+.button {
+  border: none;
+  background-color: #fff;
+  outline: #000 solid 2px;
+  border-radius: 0px;
+  color: #000;
+}
+.button:hover {
+  outline: #000 solid 2px;
+  background-color: #000;
+  color: #fff;
+}
+.button:active {
+  outline: none;
+  background-color: #000;
+  color: #fff;
+}
+#renderBtn {
+  position: relative;
+  left: 20px;
+  top: 0px;
+  width: 160px;
+  margin-top: 20px;
 }
 
 #loading {
