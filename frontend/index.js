@@ -143,7 +143,7 @@ const SKETCH = (sketch) => {
     s.draw();
   };
   s.draw = () => {
-    s.background(1);
+    s.background(255);
     drawSett();
     showSettInfo();
   };
