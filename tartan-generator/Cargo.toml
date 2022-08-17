@@ -1,7 +1,7 @@
 [package]
 name = "tartan-generator"
-version = "0.1.0"
-authors = ["swan"]
+version = "1.0.0"
+authors = ["Swan Carpenter"]
 edition = "2018"
 
 [lib]
@@ -15,8 +15,6 @@ wasm-bindgen = "0.2.63"
 js-sys = "0.3"
 getrandom = { version = "0.2.7", features = ["js"] }
 kmeans_colors = "0.5.0"
-#palette = "0.6.1"
-#kmeans = "0.2.0"
 
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

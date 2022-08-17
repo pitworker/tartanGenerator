@@ -1,7 +1,9 @@
 {
-  "name": "create-wasm-app",
-  "version": "0.1.0",
-  "description": "create an app to consume rust-generated wasm packages",
+  "name": "tartan-generator",
+  "version": "1.0.0",
+  "description": "Creates symmetrical tartans from images.",
+  "author": "Swan Carpenter",
+  "license": "GPL 3.0",
   "main": "index.js",
   "bin": {
     "create-wasm-app": ".bin/create-wasm-app.js"
@@ -12,16 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rustwasm/create-wasm-app.git"
+    "url": "git+https://github.com/pitworker/tartanGenerator.git"
   },
   "keywords": [
+    "tartan",
     "webassembly",
     "wasm",
     "rust",
     "webpack"
   ],
-  "author": "Swan Carpenter",
-  "license": "MIT",
   "dependencies": {
     "tartan-generator": "file:../tartan-generator/pkg",
     "webpack": "^4.29.3",
