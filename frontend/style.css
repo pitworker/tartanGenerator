@@ -16,6 +16,17 @@
   outline: #000 solid 2px;
   z-index: 2;
 }
+
+label {
+  position: relative;
+  margin-bottom: 20px;
+}
+#settLabel {
+  position: relative;
+  top: 0px;
+  left: 20px;
+}
+
 .barSection {
   position: relative;
   top: 0px;
@@ -37,6 +48,7 @@
 }
 #colorCount {
   position: relative;
+  margin-top: 20px;
   left: 20px;
   width: 160px;
 }
@@ -87,6 +99,13 @@
   background: #fff;
   outline: #000 solid 2px;
 }*/
+#settInfo {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  margin-top: 10px;
+  width: 100%;
+}
 .settItem {
   position: relative;
   top: 0px;
@@ -101,6 +120,14 @@
   top: 8px;
   left: 10px;
   font-size: 24px;
+}
+#fileLoadContainer {
+  position: relative;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  top: 0px;
+  left: 0px;
+  width: 160px;
 }
 .button {
   border: none;
@@ -125,6 +152,16 @@
   top: 0px;
   width: 160px;
   margin-top: 20px;
+}
+#uploadBtn {
+  position: relative;
+  left: 0px;
+  top: 0px;
+  width: 160px;
+}
+#imageLoader {
+  position: absolute;
+  visibility: hidden;
 }
 
 #loading {

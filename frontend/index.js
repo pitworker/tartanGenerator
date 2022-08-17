@@ -8,6 +8,13 @@ imageLoader.addEventListener('change', handleImage, false);
 let imgCanvas = document.getElementById('imageCanvas');
 let ctx = imgCanvas.getContext('2d');
 
+let loading = document.getElementById("loading");
+let colorSlider = document.getElementById("colorSlider");
+let colorSliderNum = document.getElementById("numColors");
+let uploadBtn = document.getElementById("uploadBtn");
+let renderBtn = document.getElementById("renderBtn");
+let settInfo = document.getElementById("settInfo");
+
 let numColors = 7;
 let numThreads = 64;
 
@@ -15,12 +22,6 @@ let gotSett = false;
 let sett = null;
 let fullSett = null;
 let s = null;
-
-let loading = document.getElementById("loading");
-let colorSlider = document.getElementById("colorSlider");
-let colorSliderNum = document.getElementById("numColors");
-let renderBtn = document.getElementById("renderBtn");
-let settInfo = document.getElementById("settInfo");
 
 const IMG_WIDTH = 160;
 
@@ -163,6 +164,10 @@ renderBtn.onclick = () => {
   showLoading();
   setTimeout(loadSett, 5);
 };
+
+uploadBtn.onclick = () => {
+  imageLoader.click();
+}
 
 function getHex(r,g,b) {
   let hexVals = [r.toString(16), g.toString(16), b.toString(16)];

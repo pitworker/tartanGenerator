@@ -15,8 +15,12 @@
     <div id="sideBar">
       <div id="controls" class="barSection">
         <div id="image">
-          <label>Image File:</label><br/>
-          <input type="file" id="imageLoader" name="imageLoader"/>
+          <label>Image File</label><br/>
+          <div id="fileLoadContainer">
+            <input type="file" id="imageLoader" name="imageLoader"/>
+            <input id="uploadBtn" class="button"
+                   type="button" value="Upload Image"/>
+          </div>
           <canvas id="imageCanvas"></canvas>
         </div>
         <div id="colorCount">
@@ -30,7 +34,10 @@
                  type="button" value="Render Tartan"/>
         </div>
       </div>
-      <div id="settInfo" class="barSection"></div>
+      <div id="settSection" class="barSection">
+        <label id="settLabel">Sett</label>
+        <div id="settInfo"></div>
+      </div>
     </div>
     <div id="loading">
       <div id="loadingText">Loading Tartan...</div>
