@@ -2,7 +2,9 @@
 
 ## Description
 
-Tartan Generator is a web app that generates symmetrical tartans based on color palettes of user-uploaded images.
+Tartan Generator is a web app that generates symmetrical tartans based on color palettes of user-uploaded images. After a user uploads an image, raw pixel data is passed to a WebAssembly backend (compiled from Rust) that uses K-Means clustering to find K dominant colors. These colors, and their relative proportions are passed back to the frontend in order to draw the tartan.
+
+A production version of the app can be found [here](https://pitworker.github.io/tartanGenerator/).
 
 ## License
 
