@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Archivo">
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <title>Tartan Generator</title>
+  </head>
+  <body>
+    <noscript>
+      This page contains webassembly and javascript content,
+      please enable javascript in your browser.
+    </noscript>
+    <div id="sideBar">
+      <div id="controls" class="barSection">
+        <div id="image">
+          <label>Image File</label><br/>
+          <div id="fileLoadContainer">
+            <input type="file" id="imageLoader" name="imageLoader"/>
+            <input id="uploadBtn" class="button"
+                   type="button" value="Upload Image"/>
+          </div>
+          <canvas id="imageCanvas"></canvas>
+        </div>
+        <div id="colorCount">
+          <label>Color Count</label>
+          <input id="colorSlider" class="slider" type="range"
+                 min="2" max="12" value="7">
+          <span id="numColors">7</span>
+        </div>
+        <div id="render">
+          <input id="renderBtn" class="button"
+                 type="button" value="Render Tartan"/>
+        </div>
+      </div>
+      <div id="settSection" class="barSection">
+        <label id="settLabel">Sett</label>
+        <div id="settInfo"></div>
+      </div>
+    </div>
+    <div id="loading">
+      <div id="loadingText">Loading Tartan...</div>
+    </div>
+    <script src="./bootstrap.js"></script>
+  </body>
+</html>
