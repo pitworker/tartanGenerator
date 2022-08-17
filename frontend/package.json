@@ -4,13 +4,16 @@
   "description": "Creates symmetrical tartans from images.",
   "author": "Swan Carpenter",
   "license": "GPL 3.0",
+  "homepage": "https://pitworker.github.io/tartanGenerator/",
   "main": "index.js",
   "bin": {
     "create-wasm-app": ".bin/create-wasm-app.js"
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "predeploy": "rm -rf dist/* && npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
@@ -24,11 +27,14 @@
     "webpack"
   ],
   "dependencies": {
-    "tartan-generator": "file:../tartan-generator/pkg",
+    "p5": "^1.4.2",
+    "tartan-generator": "file:../tartan-generator/pkg"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.0",
+    "gh-pages": "^4.0.0",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.5",
-    "copy-webpack-plugin": "^5.0.0",
-    "p5": "^1.4.2"
+    "webpack-dev-server": "^3.1.5"
   }
 }
