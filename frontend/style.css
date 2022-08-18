@@ -52,9 +52,17 @@ label {
   left: 20px;
   width: 160px;
 }
-.slider {
+#sliderContainer {
   position: relative;
+  top: 0px;
   left: 0px;
+  width: 160px;
+  height: 25px;
+}
+.slider {
+  position: absolute;
+  left: 0px;
+  top: 10.5px;
   -webkit-appearance: none;
   width: 120px;
   height: 4px;
@@ -78,12 +86,6 @@ label {
   outline: #000 solid 2px;
   z-index: 1
 }
-/*
-.slider:-webkit-slider-thumb:hover {
-  background: #fff;
-  outline: #000 solid 2px;
-}
-*/
 .slider::-moz-range-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -95,10 +97,12 @@ label {
   outline: #000 solid 2px;
   z-index: 1;
 }
-/*.slider::-moz-range-thumb:hover {
-  background: #fff;
-  outline: #000 solid 2px;
-}*/
+#numColors {
+  position: absolute;
+  top: 3px;
+  right: 0px;
+  text-align: right;
+}
 #settInfo {
   position: relative;
   top: 0px;

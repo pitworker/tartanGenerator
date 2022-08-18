@@ -10,9 +10,9 @@
     "create-wasm-app": ".bin/create-wasm-app.js"
   },
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.dev-config.js",
     "start": "webpack-dev-server",
-    "predeploy": "rm -rf dist/* && npm run build",
+    "predeploy": "rm -rf dist/* && npm webpack --config webpack.config.js",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
