@@ -6,13 +6,10 @@ extern crate js_sys;
 extern crate web_sys;
 extern crate alloc;
 
-use core::fmt;
 use alloc::{vec::Vec, format};
 use wasm_bindgen::prelude::*;
 use palette::{FromColor, IntoColor, Lab, Pixel, Srgb};
 use kmeans_colors::{get_kmeans, Kmeans};
-
-//use kmeans::*;
 
 macro_rules! log  {
   ( $( $t:tt )* ) => {
@@ -29,16 +26,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern {
   fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn log_something() {
-  log!("Hello, tartan-generator!");
-}
-
-#[wasm_bindgen]
-pub fn take_img(img_data: &[u8]) {
-  log!("it work? {0}", img_data[0]);
 }
 
 #[wasm_bindgen]
@@ -86,9 +73,6 @@ pub struct Sett {
 
 impl Sett {
   fn new(centroids: Vec<ColorValue>, t: usize) -> Sett {
-    let total_pxls : usize = centroids
-      .iter()
-      .fold(0, |total, c| total + c.count);
     let colors: Vec<ColorValue> = centroids
       .iter()
       .map(|c| ColorValue { r: c.r, g: c.g, b: c.b, count: c.count })
@@ -130,7 +114,7 @@ impl Sett {
 
     for i in 0..num_cols {
       let color = self.colors[i];
-      for j in 0..color.count {
+      for _j in 0..color.count {
         let inv_thread: usize = t_cnt - cur_thread - 1;
 
         color_per_thread[cur_thread].r = self.colors[i].r;
@@ -157,7 +141,6 @@ impl Sett {
 
 #[wasm_bindgen]
 pub struct TartanGenerator {
-  size: usize,
   pixels: Vec<Lab>
 }
 
@@ -191,11 +174,9 @@ impl TartanGenerator {
 #[wasm_bindgen]
 impl TartanGenerator {
   #[wasm_bindgen(constructor)]
-  pub fn new(s: u32, pxl: &[u8]) -> TartanGenerator {
+  pub fn new(pxl: &[u8]) -> TartanGenerator {
     utils::set_panic_hook();
     log!("making new tartan");
-    let size = s as usize;
-
     let pxl_no_alpha = Self::remove_alpha(pxl);
 
 
@@ -208,7 +189,6 @@ impl TartanGenerator {
     log!("lab generated");
 
     TartanGenerator {
-      size,
       pixels
     }
   }
@@ -302,8 +282,6 @@ impl TartanGenerator {
     }
 
     log!("Got centroids");
-
-    //log!("Centroids: {:?}", centroid_vals);
 
     Sett::new(centroid_vals, t)
   }

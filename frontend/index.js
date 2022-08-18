@@ -1,6 +1,6 @@
 import p5 from "p5";
 import { memory } from "tartan-generator/tartan_generator_bg";
-import { TartanGenerator, Sett, log_something } from "tartan-generator";
+import { TartanGenerator, Sett } from "tartan-generator";
 
 let imageLoader = document.getElementById('imageLoader');
 imageLoader.addEventListener('change', handleImage, false);
@@ -36,9 +36,8 @@ const THREAD_SIZE = 2;
 async function loadSett() {
   let imgData =
       ctx.getImageData(0,0,imgCanvas.width, imgCanvas.height).data;
-  console.log(imgData);
-  log_something();
-  let tg = new TartanGenerator(imgData.length, imgData);
+  console.log("Got image data: ", imgData);
+  let tg = new TartanGenerator(imgData);
   console.log("made new tartan generator");
   sett = tg.make_sett(numColors,numThreads);
   fullSett = sett.get_sett_per_thread();
@@ -102,7 +101,6 @@ function drawThreads(isWarp) {
     let thread = i % fullSett.get_count();
     let clr = fullSett.get_color(thread);
     s.stroke(clr.get_r(), clr.get_g(), clr.get_b());
-    /*console.log(`Drawing threads with color [${clr.get_r},${clr.get_g},${clr.get_b}] at position ${i}`);*/
     for (let j = start; j < len / THREAD_SIZE; j += 4) {
       let x = isWarp ? i : j;
       let y = isWarp ? j : i;
@@ -211,7 +209,6 @@ function showSettInfo() {
  * MISC. *
  *********/
 function showLoading() {
-  console.log("!!!!!!!!!!WHAT THE FUCK!!!!!!");
   if (loading) {
     loading.style.width = `${window.innerWidth - 200}px`;
     loading.style.visibility = "visible";
