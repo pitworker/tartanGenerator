@@ -12,7 +12,7 @@
   "scripts": {
     "build": "webpack --config webpack.dev-config.js",
     "start": "webpack-dev-server",
-    "predeploy": "rm -rf dist/* && npm webpack --config webpack.config.js",
+    "predeploy": "rm -rf dist/* && webpack --config webpack.config.js",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
