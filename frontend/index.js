@@ -236,10 +236,4 @@ window.addEventListener("load", () => {
   .match(/-(moz|webkit|ms)-/))[1];
 
   isWebkit = pref == "webkit";
-
-  // MOZ - FIREFOX (GECKO ENGINE)
-  // WEBKIT - CHROME, SAFARI, OPERA, EDGE (WEBKIT ENGINE)
-  // MS - OLD INTERNET EXPLORER & EDGE (TRIDENT ENGINE)
-  // NOTE - OLD OPERA VERSIONS USE PRESTO ENGINE. PREFIX IS -O
-  console.log(pref);
 });
