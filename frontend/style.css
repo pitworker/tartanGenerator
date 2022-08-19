@@ -15,6 +15,26 @@
   background-color: #fff;
   outline: #000 solid 2px;
   z-index: 2;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: #000 #fff;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 15px;
+}
+::-webkit-scrollbar-track {
+  background: #fff;
+  border-left: #000 solid 2px;
+  border-right: #000 solid 2px;
+}
+::-webkit-scrollbar-thumb {
+  background: #fff;
+  border: #000 solid 2px;
+}
+::-webkit-scrollbar-track:hover {
+  background: #000;
 }
 
 label {

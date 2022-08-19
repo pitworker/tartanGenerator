@@ -8,12 +8,14 @@ imageLoader.addEventListener('change', handleImage, false);
 let imgCanvas = document.getElementById('imageCanvas');
 let ctx = imgCanvas.getContext('2d');
 
+let isWebkit = false;
 let loading = document.getElementById("loading");
 let colorSlider = document.getElementById("colorSlider");
 let colorSliderNum = document.getElementById("numColors");
 let uploadBtn = document.getElementById("uploadBtn");
 let renderBtn = document.getElementById("renderBtn");
 let settInfo = document.getElementById("settInfo");
+let sideBar = document.getElementById("sideBar");
 
 let numColors = 7;
 let numThreads = 64;
@@ -202,6 +204,15 @@ function showSettInfo() {
       elem.appendChild(txt);
       settInfo.appendChild(elem);
     }
+
+    // Adjust margins for scrollbar if necessary
+    if (sideBar.scrollHeight > sideBar.clientHeight && isWebkit) {
+      sideBar.style.paddingRight = "15px";
+      sideBar.style.outline = "none";
+    } else {
+      sideBar.style.paddingRight = null;
+      sideBar.style.outline = null;
+    }
   }
 }
 
@@ -217,3 +228,18 @@ function showLoading() {
 function hideLoading() {
   if (loading) loading.style.visibility = "hidden";
 }
+
+window.addEventListener("load", () => {
+  let pref = (Array.prototype.slice
+  .call(window.getComputedStyle(document.documentElement, ""))
+  .join("")
+  .match(/-(moz|webkit|ms)-/))[1];
+
+  isWebkit = pref == "webkit";
+
+  // MOZ - FIREFOX (GECKO ENGINE)
+  // WEBKIT - CHROME, SAFARI, OPERA, EDGE (WEBKIT ENGINE)
+  // MS - OLD INTERNET EXPLORER & EDGE (TRIDENT ENGINE)
+  // NOTE - OLD OPERA VERSIONS USE PRESTO ENGINE. PREFIX IS -O
+  console.log(pref);
+});
