@@ -1,9 +1,3 @@
-#![no_std]
-
-mod utils;
-mod color_group;
-mod sett;
-
 extern crate js_sys;
 extern crate alloc;
 
@@ -12,9 +6,9 @@ use wasm_bindgen::prelude::*;
 use palette::{FromColor, IntoColor, Lab, Pixel, Srgb};
 use kmeans_colors::{get_kmeans, Kmeans};
 
-use utils::{log, set_panic_hook};
-use color_group::ColorGroup;
-use sett::Sett;
+use super::utils::{log, set_panic_hook};
+use super::color_group::ColorGroup;
+use super::sett::Sett;
 
 const NUM_CLUSTERING_RUNS: usize = 250;
 const MAX_CLUSTERING_ITERATIONS: usize = 250;
@@ -161,7 +155,7 @@ impl TartanGenerator {
 
     // Assign floor of thread proportion to all remaining colors
     for thread_idx in 0..thread_counts.len() {
-      if centroid_rgb_color_groups[i].count == 0 {
+      if centroid_rgb_color_groups[thread_idx].count == 0 {
         let proportional_thread_count = ((
           thread_counts[thread_idx] as f32 / unassigned_color_count as f32
         ) * total_unassigned_thread_count as f32) as usize;
@@ -177,23 +171,26 @@ impl TartanGenerator {
     // ceiling, but not exceeding it
     for _thread in 0..total_unassigned_thread_count {
       let mut closest: usize = 0;
-      for j in 0..thread_counts.len() {
+
+      for color_idx in 0..thread_counts.len() {
         let prop = (
-          thread_counts[j] as f32 / total_color_count as f32
+          thread_counts[color_idx] as f32 / total_color_count as f32
         ) * thread_count as f32;
         let prop_ceil = prop.ceil();
         let prop_diff = prop_ceil - prop;
-        let prop_assigned = centroid_rgb_color_groups[j].count as f32;
+        let prop_assigned = centroid_rgb_color_groups[color_idx].count as f32;
 
-        let closest_prop =
-          (thread_counts[closest] as f32 / total_color_count as f32) * thread_count as f32;
-        let closest_diff = closest_prop.ceil() - closest_prop;
+        let closest_prop = (
+          thread_counts[closest] as f32 / total_color_count as f32
+        ) * thread_count as f32;
+        let closest_prop_diff = closest_prop.ceil() - closest_prop;
 
-        if centroid_rgb_color_groups[j].count == 0 ||
-          (prop_diff < closest_diff &&
-           prop_ceil - prop_assigned > 0.0 &&
-           centroid_rgb_color_groups[closest].count != 0) {
-          closest = j;
+        if centroid_rgb_color_groups[color_idx].count == 0 || (
+          prop_diff < closest_prop_diff &&
+          prop_ceil - prop_assigned > 0.0 &&
+          centroid_rgb_color_groups[closest].count != 0
+        ) {
+          closest = color_idx;
         }
       }
       centroid_rgb_color_groups[closest].count += 1;

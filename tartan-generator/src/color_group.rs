@@ -1,18 +1,16 @@
-#![no_std]
-
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Copy, Clone)]
 pub struct ColorGroup {
-  r: u8,
-  g: u8,
-  b: u8,
-  count: usize
+  pub r: u8,
+  pub g: u8,
+  pub b: u8,
+  pub count: usize
 }
 
 impl ColorGroup {
-  fn new() -> ColorGroup {
+  pub fn new() -> ColorGroup {
     ColorGroup {
       r: 0u8,
       g: 0u8,

@@ -1,5 +1,7 @@
 #![no_std]
 
+pub mod utils;
+pub mod color_group;
 pub mod sett;
 pub mod tartan_generator;
 

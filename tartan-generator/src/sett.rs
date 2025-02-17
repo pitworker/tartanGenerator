@@ -1,15 +1,10 @@
-#![no_std]
-
-mod utils;
-mod color_group;
-
 extern crate alloc;
 
 use alloc::{vec::Vec, format};
 use wasm_bindgen::prelude::*;
 
-use utils::log;
-use color_group::ColorGroup;
+use super::utils::log;
+use super::color_group::ColorGroup;
 
 #[wasm_bindgen]
 pub struct Sett {
@@ -19,7 +14,7 @@ pub struct Sett {
 }
 
 impl Sett {
-  fn new(centroids: Vec<ColorGroup>, t: usize) -> Sett {
+  pub fn new(centroids: Vec<ColorGroup>, t: usize) -> Sett {
     let colors: Vec<ColorGroup> = centroids
       .iter()
       .map(|color| ColorGroup {
@@ -59,7 +54,7 @@ impl Sett {
   }
 
   pub fn get_sett_per_thread(&self) -> Sett {
-    let mirrored_thread_count usize = self.thread_count * 2;
+    let mirrored_thread_count: usize = self.thread_count * 2;
     let mut colors_per_thread: Vec<ColorGroup> =
       alloc::vec![ColorGroup::new(); mirrored_thread_count];
     let num_cols = self.colors.len();
