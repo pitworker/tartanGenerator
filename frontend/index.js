@@ -41,7 +41,7 @@ async function loadSett() {
   console.log("Got image data: ", imgData);
   let tg = new TartanGenerator(imgData);
   console.log("made new tartan generator");
-  sett = tg.make_sett(numColors,numThreads);
+  sett = tg.make_sett(numColors, numThreads);
   fullSett = sett.get_sett_per_thread();
   console.log(`made sett with ${sett.get_count()} colors`);
 
