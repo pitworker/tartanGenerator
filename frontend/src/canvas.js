@@ -36,77 +36,89 @@ export default class Canvas {
   }
 
   #initSketch(sketch) {
-    this.#sketch = sketch;
+    if (sketch) {
+      this.#sketch = sketch;
 
-    this.#sketch.setup = () => {
-      this.#sketch.createCanvas(
-        this.#sketch.windowWidth,
-        this.#sketch.windowHeight
-      );
-      this.#sketch.noLoop();
-      this.#sketch.draw();
-    };
+      this.#sketch.setup = () => {
+        this.#sketch.createCanvas(
+          this.#sketch.windowWidth,
+          this.#sketch.windowHeight
+        );
+        this.#sketch.noLoop();
+        this.#sketch.draw();
+      };
 
-    this.#sketch.windowResized = () => {
-      this.#sketch.resizeCanvas(
-        this.#sketch.windowWidth,
-        this.#sketch.windowHeight
-      );
-      this.#sketch.draw();
-    };
+      this.#sketch.windowResized = () => {
+        this.#sketch.resizeCanvas(
+          this.#sketch.windowWidth,
+          this.#sketch.windowHeight
+        );
+        this.#sketch.draw();
+      };
 
-    this.#sketch.draw = () => {
-      this.#sketch.background(WHITE);
-      this.#drawSett();
-    };
+      this.#sketch.draw = () => {
+        this.#sketch.background(WHITE);
+        this.#drawSett();
+      };
+    } else {
+      console.error("Sketch initialized incorrectly");
+    }
   }
 
   #drawThreads(isWarp) {
     if (this.#sketch) {
-      const numThreads = isWarp ? this.#sketch.width : this.#sketch.height;
-      const threadLength = isWarp ? this.#sketch.height : this.#sketch.width;
-
-      for (
-        let threadIdx = 0;
-        threadIdx < numThreads / this.#threadSize;
-        threadIdx++
-      ) {
-        const startOffset = isWarp ?
-          this.#threadSize * WARP_OFFSET_MULTIPLIER :
-          this.#threadSize * WEFT_OFFSET_MULTIPLIER;
-        const start = threadIdx % (this.#threadSize * 2) - startOffset;
-        const thread = threadIdx % this.#fullSett.get_count();
-        const color = this.#fullSett.get_color(thread);
-
-        this.#sketch.stroke(color.get_r(), color.get_g(), color.get_b());
+      try {
+        const numThreads = isWarp ? this.#sketch.width : this.#sketch.height;
+        const threadLength = isWarp ? this.#sketch.height : this.#sketch.width;
 
         for (
-          let threadSection = start;
-          threadSection < threadLength / this.#threadSize;
-          threadSection += this.#threadSize * 2
+          let threadIdx = 0;
+          threadIdx < numThreads / this.#threadSize;
+          threadIdx++
         ) {
-          const x = isWarp ? threadIdx : threadSection;
-          const y = isWarp ? threadSection : threadIdx;
+          const startOffset = isWarp ?
+            this.#threadSize * WARP_OFFSET_MULTIPLIER :
+            this.#threadSize * WEFT_OFFSET_MULTIPLIER;
+          const start = threadIdx % (this.#threadSize * 2) - startOffset;
+          const thread = threadIdx % this.#fullSett.get_count();
+          const color = this.#fullSett.get_color(thread);
 
-          const startX = x * this.#threadSize;
-          const startY = y * this.#threadSize;
-          const endX = startX + (isWarp ? 0 : 2) * this.#threadSize;
-          const endY = startY + (isWarp ? 2 : 0) * this.#threadSize;
+          this.#sketch.stroke(color.get_r(), color.get_g(), color.get_b());
 
-          this.#sketch.line(startX, startY, endX, endY);
+          for (
+            let threadSection = start;
+            threadSection < threadLength / this.#threadSize;
+            threadSection += this.#threadSize * 2
+          ) {
+            const x = isWarp ? threadIdx : threadSection;
+            const y = isWarp ? threadSection : threadIdx;
+
+            const startX = x * this.#threadSize;
+            const startY = y * this.#threadSize;
+            const endX = startX + (isWarp ? 0 : 2) * this.#threadSize;
+            const endY = startY + (isWarp ? 2 : 0) * this.#threadSize;
+
+            this.#sketch.line(startX, startY, endX, endY);
+          }
         }
+      } catch (err) {
+        console.error("Error drawing threads:", err);
       }
     }
   }
 
   #drawSett() {
     if (this.#sketch && this.gotSett) {
-      console.log("Drawing Sett");
-      this.#sketch.strokeWeight(this.#threadSize);
-      this.#sketch.strokeCap(this.#sketch.SQUARE);
-      this.#drawThreads(WARP);
-      this.#drawThreads(WEFT);
-      this.hideLoading();
+      try {
+        console.log("Drawing Sett");
+        this.#sketch.strokeWeight(this.#threadSize);
+        this.#sketch.strokeCap(this.#sketch.SQUARE);
+        this.#drawThreads(WARP);
+        this.#drawThreads(WEFT);
+        this.hideLoading();
+      } catch (err) {
+        console.error("Error drawing sett:", err);
+      }
     } else if (this.#sketch) {
       console.warn("Attempted to draw tartan without sett");
     } else if (this.gotSett) {
@@ -117,20 +129,28 @@ export default class Canvas {
   }
 
   draw(fullSett) {
-    this.#fullSett = fullSett;
-    if (this.#sketch) this.#sketch.draw();
+    if (fullSett) {
+      this.#fullSett = fullSett;
+      if (this.#sketch) this.#sketch.draw();
+    } else {
+      console.warn("Attempting to draw without valid Sett object");
+    }
   }
 
   showLoading() {
     if (this.#elements.loading) {
       this.#elements.loading.style.width = `${window.innerWidth - 200}px`;
       this.#elements.loading.style.visibility = "visible";
+    } else {
+      console.warn("Attempting to display loading state before page load");
     }
   }
 
   hideLoading() {
     if (this.#elements.loading) {
       this.#elements.loading.style.visibility = "hidden";
+    } else {
+      console.warn("Attempting to hide loading state before page load");
     }
   }
 }

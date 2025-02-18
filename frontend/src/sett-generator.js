@@ -20,43 +20,56 @@ export default class SettGenerator {
 
   #printColors() {
     if (this.#sett) {
-      let colors = "[";
-      for (let colorIdx = 0; colorIdx < this.numColors; colorIdx++) {
-        let color = this.#sett.get_color(colorIdx);
-        colors += "\n  {";
-        colors += `\n    r: ${color.get_r()}, `
-        colors += `\n    g: ${color.get_g()}, `
-        colors += `\n    b: ${color.get_b()}, `
-        colors += `\n    count: ${color.get_count()}`
-        colors += "\n  }";
-        if (colorIdx != this.numColors - 1) colors += ","
+      try {
+        let colors = "[";
+        for (let colorIdx = 0; colorIdx < this.numColors; colorIdx++) {
+          let color = this.#sett.get_color(colorIdx);
+          colors += "\n  {";
+          colors += `\n    r: ${color.get_r()}, `
+          colors += `\n    g: ${color.get_g()}, `
+          colors += `\n    b: ${color.get_b()}, `
+          colors += `\n    count: ${color.get_count()}`
+          colors += "\n  }";
+          if (colorIdx != this.numColors - 1) colors += ","
+        }
+        colors += "\n]";
+        console.log("colors:", colors);
+      } catch (err) {
+        console.error("Error printing colors:", err);
       }
-      colors += "\n]";
-      console.log("colors:", colors);
+    } else {
+      console.warn("No colors to print");
     }
   }
 
   load(imageData) {
     return new Promise((resolve, reject) => {
-      if (imageData) {
-        console.log("Got image data:", imageData);
+      try {
+        if (imageData) {
+          console.log("Got image data:", imageData);
 
-        const tartanGenerator = new TartanGenerator(imageData);
+          const tartanGenerator = new TartanGenerator(imageData);
 
-        console.log("made new tartan generator");
+          console.log("made new tartan generator");
 
-        this.#sett = tartanGenerator.make_sett(this.numColors, this.numThreads);
-        this.#fullSett = this.#sett.get_sett_per_thread();
+          this.#sett = tartanGenerator.make_sett(
+            this.numColors,
+            this.numThreads
+          );
+          this.#fullSett = this.#sett.get_sett_per_thread();
 
-        console.log(`made sett with ${sett.get_count()} colors`);
+          console.log(`made sett with ${sett.get_count()} colors`);
 
-        this.#printColors();
+          this.#printColors();
 
-        this.#gotSett = true;
+          this.#gotSett = true;
 
-        resolve();
-      } else {
-        reject("No image data");
+          resolve();
+        } else {
+          reject("No image data");
+        }
+      } catch (err) {
+        reject(err);
       }
     });
   }
