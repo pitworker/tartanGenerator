@@ -1,6 +1,9 @@
 import { memory } from "tartan-generator/tartan_generator_bg";
 import { TartanGenerator, Sett } from "tartan-generator";
 
+const NUM_COLORS_DEFAULT = 7;
+const NUM_THREADS_DEFAULT = 64;
+
 export default class SettGenerator {
   #gotSett;
   #sett;
@@ -55,7 +58,7 @@ export default class SettGenerator {
       } else {
         reject("No image data");
       }
-    };
+    });
   }
 
   get gotSett() {

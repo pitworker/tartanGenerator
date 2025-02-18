@@ -35,7 +35,7 @@ export default class Canvas {
     this.#p5Instance = new p5(this.#initSketch);
   }
 
-  #initSketch(sketch) => {
+  #initSketch(sketch) {
     this.#sketch = sketch;
 
     this.#sketch.setup = () => {
