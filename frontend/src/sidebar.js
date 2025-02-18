@@ -1,57 +1,9 @@
-import { memory } from "tartan-generator/tartan_generator_bg";
-import { TartanGenerator, Sett } from "tartan-generator";
+const DEFAULT_IMAGE_WIDTH = 160;
 
-let imageLoader = document.getElementById('imageLoader');
-imageLoader.addEventListener('change', handleImage, false);
+const COLOR_BRIGHTNESS_SUM = 382;
 
-let imgCanvas = document.getElementById('imageCanvas');
-let ctx = imgCanvas.getContext('2d');
-
-let loading = document.getElementById("loading");
-let colorSlider = document.getElementById("colorSlider");
-let colorSliderNum = document.getElementById("numColors");
-let uploadBtn = document.getElementById("uploadBtn");
-let renderBtn = document.getElementById("renderBtn");
-let settInfo = document.getElementById("settInfo");
-let sideBar = document.getElementById("sideBar");
-
-
-const IMG_WIDTH = 160;
-
-/*************************
- * SIDE PANEL INFORMATION*
- *************************/
-class SideBar {
-  #numColors = 7;
-  #numThreads = 64;
-
-  #isWebkit = false;
-
-  #elements = {
-    colorSlider: null,
-    colorSliderNum: null,
-    uploadBtn: null,
-    renderBtn: null,
-    settInfo: null,
-    sideBar: null,
-    imageLoader: null
-  }
-}
-
-colorSliderNum.innerText = colorSlider.value;
-colorSlider.oninput = () => {
-  colorSliderNum.innerText = colorSlider.value;
-  numColors = colorSlider.value;
-};
-
-renderBtn.onclick = () => {
-  showLoading();
-  setTimeout(loadSett, 5);
-};
-
-uploadBtn.onclick = () => {
-  imageLoader.click();
-}
+const BLACK = "#000";
+const WHITE = "#fff";
 
 function getHex(r,g,b) {
   let hexVals = [r.toString(16), g.toString(16), b.toString(16)];
@@ -61,63 +13,211 @@ function getHex(r,g,b) {
   return `#${hexVals[0]}${hexVals[1]}${hexVals[2]}`;
 }
 
-function showSettInfo() {
-  if (settInfo && gotSett) {
-    // Clear out any old children
-    while (settInfo.hasChildNodes()) {
-      settInfo.removeChild(settInfo.firstChild);
-    }
+/*************************
+ * SIDE PANEL INFORMATION*
+ *************************/
+export default class Sidebar {
+  #isWebkit = false;
 
-    // Add element for each color
-    for (let i = 0;  i < numColors; i++) {
-      let clr = sett.get_color(i);
-      let hex = getHex(clr.get_r(), clr.get_g(), clr.get_b());
-      let count = clr.get_count();
+  #imageWidth = DEFAULT_IMAGE_WIDTH;
 
-      let elem = document.createElement("DIV");
-      let txt = document.createElement("DIV");
-      elem.className = "settItem";
-      elem.id = `settItem${i}`;
-      txt.className = "settItemTxt";
-      txt.innerText = `${hex}: ${count}`;
-      elem.style.backgroundColor = hex;
-      txt.style.color = (clr.get_r() + clr.get_g() + clr.get_b()) > 382 ?
-        "#000" :
-        "#fff";
+  #imageCanvasContext = null;
 
-      elem.appendChild(txt);
-      settInfo.appendChild(elem);
-    }
+  #settGenerator = null;
+  #canvas = null;
 
-    // Adjust margins for scrollbar if necessary
-    if (sideBar.scrollHeight > sideBar.clientHeight && isWebkit) {
-      sideBar.style.paddingRight = "15px";
-      sideBar.style.outline = "none";
-    } else {
-      sideBar.style.paddingRight = null;
-      sideBar.style.outline = null;
+  #elements = {
+    colorSlider: null,
+    colorSliderNum: null,
+    uploadButton: null,
+    renderButton: null,
+    settInfo: null,
+    sideBar: null,
+    imageLoader: null,
+    imageCanvas: null
+  }
+
+  constructor(canvas, settGenerator, imageWidth) {
+    this.#trackElements();
+    this.#assignListeners();
+
+    this.#elements.colorSliderNum.innerText = this.#elements.colorSlider.value;
+
+    this.#imageCanvasContext = this.#elements.imageCanvas.getContext("2d");
+
+    this.#canvas = canvas;
+    this.#settGenerator = settGenerator;
+
+    if (imageWidth && typeof imageWidth === "number") {
+      this.#imageWidth = imageWidth;
     }
   }
-}
 
-/*********
- * MISC. *
- *********/
-function showLoading() {
-  if (loading) {
-    loading.style.width = `${window.innerWidth - 200}px`;
-    loading.style.visibility = "visible";
+  #trackElements() {
+    this.#elements.colorSlider = document.getElementById("colorSlider");
+    this.#elements.colorSliderNum = document.getElementById("numColors");
+    this.#elements.uploadButton = document.getElementById("uploadBtn");
+    this.#elements.renderButton = document.getElementById("renderBtn");
+    this.#elements.settInfo = document.getElementById("settInfo");
+    this.#elements.sideBar = document.getElementById("sideBar");
+    this.#elements.imageLoader = document.getElementById("imageLoader");
+    this.#elements.imageCanvas = document.getElementById("imageCanvas");
+  }
+
+  #assignListeners() {
+    window.addEventListener("load", () => {
+      const browser = (Array.prototype.slice.call(
+        window.getComputedStyle(document.documentElement, ""
+      )).join("").match(/-(moz|webkit|ms)-/))[1];
+
+      this.#isWebkit = browser === "webkit";
+    });
+
+    this.#elements.imageLoader.addEventListener(
+      "change",
+      (uploadEvent) => this.#imageUploadHandler(uploadEvent),
+      false
+    );
+
+    this.#elements.colorSlider.oninput =
+      () => this.#colorSliderInputHandler();
+
+    this.#elements.renderButton.onclick =
+      () => this.#renderButtonClickHandler();
+
+    this.#elements.uploadButton.onclick =
+      () => this.#uploadButtonClickHandler();
+  }
+
+  #imageUploadHandler(uploadEvent) {
+    const reader = new FileReader();
+    reader.onload = (readerLoadEvent) => {
+      const image = new Image();
+      image.onload = () => this.#imageLoadHandler();
+      image.src = readerLoadEvent.target.result;
+    }
+    reader.readAsDataURL(uploadEvent.target.files[0]);
+  }
+
+  #imageLoadHandler() {
+    this.#elements.imageCanvas.width = this.#imageWidth;
+
+    this.#elements.imageCanvas.height =
+      this.#imageWidth / image.width * image.height;
+
+    this.#imageCanvasContext.drawImage(
+      image,
+      0,
+      0,
+      this.#elements.imageCanvas.width,
+      this.#elements.imageCanvas.height
+    );
+  }
+
+  #colorSliderInputHandler() {
+    this.#elements.colorSliderNum.innerText = this.#elements.colorSlider.value;
+    this.#settGenerator.numColors = this.#elements.colorSlider.value;
+  }
+
+  #renderButtonClickHandler() {
+    this.#canvas.showLoading();
+
+    const imageData = this.#imageCanvasContext.getImageData(
+      0,
+      0,
+      this.#elements.imageCanvas.width,
+      this.#elements.imageCanvas.height
+    ).data;
+
+    setTimeout(
+      () => this.#settGenerator.load(imageData).then(() => {
+        this.#canvas.drawSett(this.#settGenerator.fullSett);
+        this.#showSettInfo();
+      }).catch(err => {
+        console.warn(err);
+      }),
+      5
+    );
+  }
+
+  #uploadButtonClickHandler() {
+    this.#elements.imageLoader.click();
+  }
+
+  #showSettInfo() {
+    if (this.#elements.settInfo && this.#settGenerator.gotSett) {
+      // Clear out any old children
+      while (this.#elements.settInfo.hasChildNodes()) {
+        settInfo.removeChild(settInfo.firstChild);
+      }
+
+      // Add element for each color
+      for (
+        let colorIdx = 0;
+        colorIdx < this.#settGenerator.numColors;
+        colorIdx++
+      ) {
+        const color = sett.get_color(i);
+        const colorHex = getHex(color.get_r(), color.get_g(), color.get_b());
+        const count = color.get_count();
+
+        const colorContainer = document.createElement("DIV");
+        const colorLabel = document.createElement("DIV");
+
+        colorContainer.className = "settItem";
+        colorContainer.id = `settItem${i}`;
+        colorContainer.style.backgroundColor = hex;
+
+        colorLabel.className = "settItemTxt";
+        colorLabel.innerText = `${hex}: ${count}`;
+
+        colorLabel.style.color = (
+          color.get_r() + color.get_g() + color.get_b()
+        ) > COLOR_BRIGTHNESS_SUM ? BLACK : WHITE;
+
+        colorContainer.appendChild(colorLabel);
+        this.#elements.settInfo.appendChild(colorContainer);
+      }
+
+      // Adjust margins for scrollbar if necessary
+      const sideBarElem = this.#elements.sideBar;
+      if (
+        sideBarElem.scrollHeight > sideBarElem.clientHeight && this.#isWebkit
+      ) {
+        sideBarElem.style.paddingRight = "15px";
+        sideBarElem.style.outline = "none";
+      } else {
+        sideBarElem.style.paddingRight = null;
+        sideBarElem.style.outline = null;
+      }
+    }
+  }
+
+  loadSampleSett() {
+    const image = new Image();
+
+    this.#settGenerator.numColors = this.#elements.colorSlider.value;
+
+    this.#canvas.showLoading();
+
+    image.onload = () => {
+      this.#imageLoadHandler();
+
+      const imageData = this.#imageCanvasContext.getImageData(
+        0,
+        0,
+        this.#elements.imageCanvas.width,
+        this.#elements.imageCanvas.height
+      ).data;
+
+      setTimeout(() => this.#settGenerator.load(imageData).then(() => {
+        this.#canvas.drawSett(this.#settGenerator.fullSett);
+        this.#showSettInfo();
+      }).catch(err => {
+        console.warn(err);
+      }), 15);
+    }
+
+    image.src = "./media/kandinsky.jpg";
   }
 }
-function hideLoading() {
-  if (loading) loading.style.visibility = "hidden";
-}
-
-window.addEventListener("load", () => {
-  let pref = (Array.prototype.slice
-  .call(window.getComputedStyle(document.documentElement, ""))
-  .join("")
-  .match(/-(moz|webkit|ms)-/))[1];
-
-  isWebkit = pref == "webkit";
-});
