@@ -1,4 +1,3 @@
-// import { memory } from "tartan-generator/tartan_generator_bg";
 import { TartanGenerator, Sett } from "tartan-generator";
 
 const NUM_COLORS_DEFAULT = 7;
@@ -85,18 +84,4 @@ export default class SettGenerator {
       }
     });
   }
-
-  /*
-  get gotSett() {
-    return this.gotSett;
-  }
-
-  get sett() {
-    return this.sett;
-  }
-
-  get fullSett() {
-    return this.fullSett;
-  }
-  */
 }

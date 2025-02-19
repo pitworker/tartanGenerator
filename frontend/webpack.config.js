@@ -24,7 +24,4 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin(["src/index.html", "src/style.css", "media/*"])
   ],
-  experiments: {
-    syncWebAssembly: true,
-  },
 };
