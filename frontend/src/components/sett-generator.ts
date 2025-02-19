@@ -65,7 +65,7 @@ export default class SettGenerator {
           );
           this.fullSett = this.sett.get_sett_per_thread();
 
-          console.log(`made sett with ${this.sett.get_count()} colors`);
+          console.log(`made sett with ${this.sett.get_color_count()} colors`);
 
           this.printColors();
 

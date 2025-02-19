@@ -89,7 +89,7 @@ export default class Canvas {
             this.threadSize * WARP_OFFSET_MULTIPLIER :
             this.threadSize * WEFT_OFFSET_MULTIPLIER;
           const start = threadIdx % (this.threadSize * 2) - startOffset;
-          const thread = threadIdx % this.fullSett.get_count();
+          const thread = threadIdx % this.fullSett.get_thread_count();
           const color = this.fullSett.get_color(thread);
 
           this.sketch.stroke(color.get_r(), color.get_g(), color.get_b());
