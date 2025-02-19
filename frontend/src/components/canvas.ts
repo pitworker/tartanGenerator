@@ -17,7 +17,7 @@ const WHITE = 255;
 
 export default class Canvas {
   private threadSize = DEFAULT_THREAD_SIZE;
-  private sketch: any = null;
+  private sketch: P5 | null = null;
   private p5Instance: P5 | null = null;
 
   gotSett = false;
@@ -34,40 +34,39 @@ export default class Canvas {
     }
 
     this.elements.loading = document.getElementById("loading");
-    this.p5Instance = new P5(this.initSketch);
+    this.p5Instance = new P5(
+      (sketch: P5) => this.initSketch(sketch),
+      document.body
+    );
   }
 
-  private initSketch(sketch: any) {
-    if (sketch) {
-      try {
-        this.sketch = sketch;
+  private initSketch(sketch: P5) {
+    try {
+      this.sketch = sketch;
 
-        this.sketch.setup = () => {
-          this.sketch.createCanvas(
-            this.sketch.windowWidth,
-            this.sketch.windowHeight
-          );
-          this.sketch.noLoop();
-          this.sketch.draw();
-        };
+      this.sketch.setup = () => {
+        this.sketch.createCanvas(
+          this.sketch.windowWidth,
+          this.sketch.windowHeight
+        );
+        this.sketch.noLoop();
+        this.sketch.draw();
+      };
 
-        this.sketch.windowResized = () => {
-          this.sketch.resizeCanvas(
-            this.sketch.windowWidth,
-            this.sketch.windowHeight
-          );
-          this.sketch.draw();
-        };
+      this.sketch.windowResized = () => {
+        this.sketch.resizeCanvas(
+          this.sketch.windowWidth,
+          this.sketch.windowHeight
+        );
+        this.sketch.draw();
+      };
 
-        this.sketch.draw = () => {
-          this.sketch.background(WHITE);
-          this.drawSett();
-        };
-      } catch (err: any) {
-        console.error("Error initializing sketch:", err);
-      }
-    } else {
-      console.error("Sketch initialized incorrectly");
+      this.sketch.draw = () => {
+        this.sketch.background(WHITE);
+        this.drawSett();
+      };
+    } catch (err: any) {
+      console.error("Error initializing sketch:", err);
     }
   }
 
@@ -138,8 +137,9 @@ export default class Canvas {
     }
   }
 
-  draw(fullSett: Sett) {
+  draw(fullSett: Sett, gotSett: boolean) {
     this.fullSett = fullSett;
+    this.gotSett = gotSett;
     if (this.sketch) {
       try {
         this.sketch.draw();
@@ -147,7 +147,7 @@ export default class Canvas {
         console.error("Error drawing sett:", err);
       }
     } else {
-      console.warn("Attempting to draw without valid Sett object");
+      console.warn("Attempting to draw without valid sketch object");
     }
   }
 

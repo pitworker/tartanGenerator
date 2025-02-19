@@ -222,7 +222,7 @@ export default class Sidebar {
           fullSett: Sett,
           gotSett: boolean
         }) => {
-          this.canvas.draw(fullSett);
+          this.canvas.draw(fullSett, gotSett);
           this.showSettInfo(sett, gotSett);
         }).catch((err: any) => {
           console.error(err);
@@ -326,7 +326,7 @@ export default class Sidebar {
           fullSett: Sett,
           gotSett: boolean
         }) => {
-          this.canvas.draw(fullSett);
+          this.canvas.draw(fullSett, gotSett);
           this.showSettInfo(sett, gotSett);
         }).catch((err: any) => {
           console.warn(err);
