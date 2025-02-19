@@ -1,4 +1,4 @@
-import { memory } from "tartan-generator/tartan_generator_bg";
+// import { memory } from "tartan-generator/tartan_generator_bg";
 import { TartanGenerator, Sett } from "tartan-generator";
 
 const NUM_COLORS_DEFAULT = 7;
@@ -42,8 +42,16 @@ export default class SettGenerator {
     }
   }
 
-  load(imageData: Uint8ClampedArray<ArrayBufferLike>) {
-    return new Promise((resolve, reject) => {
+  load(imageData: Uint8Array<ArrayBufferLike>) {
+    return new Promise((resolve: ({
+      sett,
+      fullSett,
+      gotSett
+    }: {
+      sett: Sett,
+      fullSett: Sett,
+      gotSett: boolean
+    }) => void, reject: (err: any) => void) => {
       try {
         if (imageData) {
           console.log("Got image data:", imageData);
@@ -58,13 +66,17 @@ export default class SettGenerator {
           );
           this.fullSett = this.sett.get_sett_per_thread();
 
-          console.log(`made sett with ${sett.get_count()} colors`);
+          console.log(`made sett with ${this.sett.get_count()} colors`);
 
           this.printColors();
 
           this.gotSett = true;
 
-          resolve();
+          resolve({
+            sett: this.sett,
+            fullSett: this.fullSett,
+            gotSett: this.gotSett
+          });
         } else {
           reject("No image data");
         }
@@ -74,6 +86,7 @@ export default class SettGenerator {
     });
   }
 
+  /*
   get gotSett() {
     return this.gotSett;
   }
@@ -85,4 +98,5 @@ export default class SettGenerator {
   get fullSett() {
     return this.fullSett;
   }
+  */
 }

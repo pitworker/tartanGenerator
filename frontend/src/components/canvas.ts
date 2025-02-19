@@ -1,4 +1,4 @@
-import P5 from "p5";
+import * as P5 from "p5";
 import { Sett } from "tartan-generator";
 
 const DEFAULT_THREAD_SIZE = 2;

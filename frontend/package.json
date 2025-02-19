@@ -5,7 +5,7 @@
   "author": "Swan Carpenter",
   "license": "GPL 3.0",
   "homepage": "https://pitworker.github.io/tartanGenerator/",
-  "main": "index.ts",
+  "main": "main.ts",
   "bin": {
     "create-wasm-app": ".bin/create-wasm-app.js"
   },

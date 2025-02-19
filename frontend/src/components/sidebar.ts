@@ -1,3 +1,5 @@
+import { Sett } from "tartan-generator";
+
 import SettGenerator from "./sett-generator";
 import Canvas from "./canvas";
 
@@ -73,14 +75,30 @@ export default class Sidebar {
 
   private trackElements() {
     try {
-      this.elements.colorSlider = document.getElementById("colorSlider");
-      this.elements.colorSliderNum = document.getElementById("numColors");
-      this.elements.uploadButton = document.getElementById("uploadBtn");
-      this.elements.renderButton = document.getElementById("renderBtn");
-      this.elements.settInfo = document.getElementById("settInfo");
-      this.elements.sideBar = document.getElementById("sideBar");
-      this.elements.imageLoader = document.getElementById("imageLoader");
-      this.elements.imageCanvas = document.getElementById("imageCanvas");
+      this.elements.colorSlider = <HTMLInputElement>document.getElementById(
+        "colorSlider"
+      );
+      this.elements.colorSliderNum = <HTMLDivElement>document.getElementById(
+        "numColors"
+      );
+      this.elements.uploadButton = <HTMLInputElement>document.getElementById(
+        "uploadBtn"
+      );
+      this.elements.renderButton = <HTMLInputElement>document.getElementById(
+        "renderBtn"
+      );
+      this.elements.settInfo = <HTMLDivElement>document.getElementById(
+        "settInfo"
+      );
+      this.elements.sideBar = <HTMLDivElement>document.getElementById(
+        "sideBar"
+      );
+      this.elements.imageLoader = <HTMLInputElement>document.getElementById(
+        "imageLoader"
+      );
+      this.elements.imageCanvas = <HTMLCanvasElement>document.getElementById(
+        "imageCanvas"
+      );
     } catch (err: any) {
       console.error("Failing to get page elements with error:", err);
     }
@@ -98,7 +116,7 @@ export default class Sidebar {
     if (this.elements.imageLoader) {
       this.elements.imageLoader.addEventListener(
         "change",
-        (uploadEvent) => this.imageUploadHandler(uploadEvent),
+        uploadEvent => this.imageUploadHandler(uploadEvent),
         false
       );
     } else {
@@ -142,10 +160,17 @@ export default class Sidebar {
     const reader = new FileReader();
     reader.onload = (readerLoadEvent) => {
       const image = new Image();
-      image.src = readerLoadEvent.target.result;
+      const loadResult = readerLoadEvent.target.result;
+      if (typeof loadResult === "string") {
+        image.src = loadResult;
+      } else {
+        const loadResultAsArray = new Uint16Array(loadResult);
+        image.src = String.fromCharCode.apply(null, loadResultAsArray);
+      }
       image.onload = () => this.imageLoadHandler(image);
     }
-    reader.readAsDataURL(uploadEvent.target.files[0]);
+    const uploadTarget = <HTMLInputElement>uploadEvent.target;
+    reader.readAsDataURL(uploadTarget.files[0]);
   }
 
   private imageLoadHandler(image: HTMLImageElement) {
@@ -180,17 +205,25 @@ export default class Sidebar {
     try {
       this.canvas.showLoading();
 
-      const imageData = this.imageCanvasContext.getImageData(
+      const imageData = new Uint8Array(this.imageCanvasContext.getImageData(
         0,
         0,
         this.elements.imageCanvas.width,
         this.elements.imageCanvas.height
-      ).data;
+      ).data);
 
       setTimeout(
-        () => this.settGenerator.load(imageData).then(() => {
-          this.canvas.drawSett(this.settGenerator.fullSett);
-          this.showSettInfo();
+        () => this.settGenerator.load(imageData).then(({
+          sett,
+          fullSett,
+          gotSett
+        }: {
+          sett: Sett,
+          fullSett: Sett,
+          gotSett: boolean
+        }) => {
+          this.canvas.draw(fullSett);
+          this.showSettInfo(sett, gotSett);
         }).catch((err: any) => {
           console.error(err);
         }),
@@ -209,9 +242,9 @@ export default class Sidebar {
     }
   }
 
-  private showSettInfo() {
+  private showSettInfo(sett: Sett, gotSett: boolean) {
     try {
-      if (this.elements.settInfo && this.settGenerator.gotSett) {
+      if (this.elements.settInfo && gotSett) {
         // Clear out any old children
         while (this.elements.settInfo.hasChildNodes()) {
           this.elements.settInfo.removeChild(this.elements.settInfo.firstChild);
@@ -223,7 +256,7 @@ export default class Sidebar {
           colorIdx < this.settGenerator.numColors;
           colorIdx++
         ) {
-          const color = this.settGenerator.sett.get_color(i)!;
+          const color = sett.get_color(colorIdx)!;
           const colorHex = getHex({
             r: color.get_r(),
             g: color.get_g(),
@@ -235,15 +268,15 @@ export default class Sidebar {
           const colorLabel = document.createElement("DIV");
 
           colorContainer.className = "settItem";
-          colorContainer.id = `settItem${i}`;
-          colorContainer.style.backgroundColor = hex;
+          colorContainer.id = `settItem${colorIdx}`;
+          colorContainer.style.backgroundColor = colorHex;
 
           colorLabel.className = "settItemTxt";
-          colorLabel.innerText = `${hex}: ${count}`;
+          colorLabel.innerText = `${colorHex}: ${count}`;
 
           colorLabel.style.color = (
             color.get_r() + color.get_g() + color.get_b()
-          ) > COLOR_BRIGTHNESS_SUM ? BLACK : WHITE;
+          ) > COLOR_BRIGHTNESS_SUM ? BLACK : WHITE;
 
           colorContainer.appendChild(colorLabel);
           this.elements.settInfo.appendChild(colorContainer);
@@ -277,17 +310,25 @@ export default class Sidebar {
       image.onload = () => {
         this.imageLoadHandler(image);
 
-        const imageData = this.imageCanvasContext.getImageData(
+        const imageData = new Uint8Array(this.imageCanvasContext.getImageData(
           0,
           0,
           this.elements.imageCanvas.width,
           this.elements.imageCanvas.height
-        ).data;
+        ).data);
 
-        setTimeout(() => this.settGenerator.load(imageData).then(() => {
-          this.canvas.drawSett(this.settGenerator.fullSett);
-          this.showSettInfo();
-        }).catch(err => {
+        setTimeout(() => this.settGenerator.load(imageData).then(({
+          sett,
+          fullSett,
+          gotSett
+        }: {
+          sett: Sett,
+          fullSett: Sett,
+          gotSett: boolean
+        }) => {
+          this.canvas.draw(fullSett);
+          this.showSettInfo(sett, gotSett);
+        }).catch((err: any) => {
           console.warn(err);
         }), 15);
       }
