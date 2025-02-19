@@ -5,25 +5,25 @@ const NUM_COLORS_DEFAULT = 7;
 const NUM_THREADS_DEFAULT = 64;
 
 export default class SettGenerator {
-  #gotSett;
-  #sett;
-  #fullSett;
+  private gotSett: boolean;
+  private sett: Sett | null;
+  private fullSett: Sett | null;
 
   numColors = NUM_COLORS_DEFAULT;
   numThreads = NUM_THREADS_DEFAULT;
 
   constructor() {
-    this.#gotSett = false;
-    this.#sett = null;
-    this.#fullSett = null;
+    this.gotSett = false;
+    this.sett = null;
+    this.fullSett = null;
   }
 
-  #printColors() {
-    if (this.#sett) {
+  private printColors() {
+    if (this.sett) {
       try {
         let colors = "[";
         for (let colorIdx = 0; colorIdx < this.numColors; colorIdx++) {
-          let color = this.#sett.get_color(colorIdx);
+          let color = this.sett.get_color(colorIdx);
           colors += "\n  {";
           colors += `\n    r: ${color.get_r()}, `
           colors += `\n    g: ${color.get_g()}, `
@@ -34,7 +34,7 @@ export default class SettGenerator {
         }
         colors += "\n]";
         console.log("colors:", colors);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error printing colors:", err);
       }
     } else {
@@ -42,7 +42,7 @@ export default class SettGenerator {
     }
   }
 
-  load(imageData) {
+  load(imageData: Uint8ClampedArray<ArrayBufferLike>) {
     return new Promise((resolve, reject) => {
       try {
         if (imageData) {
@@ -52,17 +52,17 @@ export default class SettGenerator {
 
           console.log("made new tartan generator");
 
-          this.#sett = tartanGenerator.make_sett(
+          this.sett = tartanGenerator.make_sett(
             this.numColors,
             this.numThreads
           );
-          this.#fullSett = this.#sett.get_sett_per_thread();
+          this.fullSett = this.sett.get_sett_per_thread();
 
           console.log(`made sett with ${sett.get_count()} colors`);
 
-          this.#printColors();
+          this.printColors();
 
-          this.#gotSett = true;
+          this.gotSett = true;
 
           resolve();
         } else {
@@ -75,14 +75,14 @@ export default class SettGenerator {
   }
 
   get gotSett() {
-    return this.#gotSett;
+    return this.gotSett;
   }
 
   get sett() {
-    return this.#sett;
+    return this.sett;
   }
 
   get fullSett() {
-    return this.#fullSett;
+    return this.fullSett;
   }
 }

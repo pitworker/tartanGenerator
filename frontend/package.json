@@ -5,7 +5,7 @@
   "author": "Swan Carpenter",
   "license": "GPL 3.0",
   "homepage": "https://pitworker.github.io/tartanGenerator/",
-  "main": "index.js",
+  "main": "index.ts",
   "bin": {
     "create-wasm-app": ".bin/create-wasm-app.js"
   },
@@ -27,16 +27,19 @@
     "webpack"
   ],
   "dependencies": {
+    "@types/p5": "^1.4.2",
     "p5": "^1.4.2",
     "tartan-generator": "file:../tartan-generator/pkg"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
     "@babel/preset-env": "^7.26.9",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^7.1.5",
     "copy-webpack-plugin": "^5.0.0",
     "gh-pages": "^4.0.0",
-    "webpack": "^5.98.0",
+    "ts-loader": "^8.4.0",
+    "typescript": "^5.7.3",
+    "webpack": "^4.47.0",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
   }

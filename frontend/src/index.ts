@@ -1,6 +1,6 @@
-import Canvas from "./src/canvas";
-import Sidebar from "./src/sidebar";
-import SettGenerator from "./src/sett-generator";
+import Canvas from "./components/canvas";
+import Sidebar from "./components/sidebar";
+import SettGenerator from "./components/sett-generator";
 
 const settGenerator = new SettGenerator();
 const canvas = new Canvas();
